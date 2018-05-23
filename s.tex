@@ -1,0 +1,146 @@
+
+\documentclass[12pt,a4paper]{scrartcl}
+
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[T1]{fontenc} 
+\usepackage[latin1]{inputenc} 
+\usepackage[ngerman]{babel}
+\usepackage[right=3cm]{geometry}
+\usepackage{listings} % for code
+\lstset{language=C, numbers=left}
+
+\parindent=0pt
+\parskip=1em plus 2pt minus 1pt
+
+\topskip-2cm
+\textheight25cm
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\thepage}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+  \LARGE
+  Praktische \"Ubungen - \\
+  Experimentelle Hardwareprojekte \\
+  \bigskip
+  \Large 
+  Versuchsprotokoll
+\end{center}
+
+\vspace{1em}
+Versuch: S - SIMD 
+
+Versuchsdatum und -zeit: 23. Mai 2018, 14 - 17 Uhr 
+
+Betreuer: Daniel Walther
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
+
+Email: alexander.kuehnle@uni-jena.de
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Mark Umnus, B.Sc. Informatik, 167419
+
+Email: mark.umnus@uni-jena.de
+
+\vspace*{1cm}
+%% \mbox{}\\
+\hrule
+\vspace*{1cm}
+{\Large  Eigenst\"andigkeitserkl\"arung }
+ 
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt 
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll 
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle 
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem 
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren 
+können. \\
+
+Unterschriften: \\ 
+\hspace*{4cm} ........................................ 
+\hspace{2cm} ........................................  \\
+
+\hrule
+
+\vspace*{0.3cm}
+\textbf{Vom Betreuer auszufüllen:}
+
+Vorbereitung/Kolloquium:
+
+Durchführung:
+
+Protokoll:
+
+Gesamtbewertung:
+\clearpage
+
+
+% Hier geht das Protokoll los...
+
+\section{Vorbereitung}
+
+
+\section{Vorgehensweise}
+Zur Durchf\"uhrung war die vorgegebene Datei \texttt{simd.c} zu erweitern.
+Dazu konnten Hilfsfunktionen der \texttt{support.c}-Datei genutzt werden.
+Abschlie\ss end wurde das Makefile genutzt, um die Dateien zu kompilieren und den Film abzuspielen.
+
+
+\section{Erprobung}
+In der ersten Aufgabe 3.1 musste lediglich der vorgegebene Code aktiviert werden, indem die Pr\"aprozessordirektive von 0 auf 1 gesetzt wurde.
+Dieser Teil hatte den Effekt eine zweisek\"undige Sequenz mit einem schwarzen Bildschirm einzublenden.
+Das Makefile konnte zun\"achst nicht ohne Weiteres genutzt werden, da der eingestellte Media Player \emph{mplayer} nicht installiert war.
+Die entsprechende Zeile haben wir durch den Player \emph{totem} ge\"andert.
+
+Die zweite Aufgabe bestand darin, das Video A \"uber einen Zeitraum von 2 Sekunden einzublenden.
+Dazu waren die Zeilen 14-16 von Listing \ref{a3.2} hinzuzuf\"ugen, der Rest war gegeben.
+
+\begin{lstlisting}[caption=Fade-In von Video A \"uber 2 Sekunden, label=a3.2]
+int frame;
+float fade_duration = 2 * 25.0;
+
+for (frame = 0; frame < (int) fade_duration; frame++)
+{
+   __m128 skalar;
+
+    load_next_frame_from_videoA (inputframeA);
+    skalar = _mm_set1_ps (((float) frame) / fade_duration);
+
+    for (i=0; i < IMAGE_SIZE * 4; i+=4)
+    {
+        __m128 floatvektor, ergebnis;
+        floatvektor = _mm_load_ps (&inputframeA[i]);
+        ergebnis = _mm_mul_ps (skalar, floatvektor);
+        _mm_store_ps (&outputframe[i], ergebnis);
+    }
+
+    save_frame (outputframe);
+}
+\end{lstlisting}
+
+Die \"au\ss ere for-Schleife sorgt daf\"ur, dass insgesamt 50 Bilder f\"ur 2 Sekunden Video erzeugt werden.
+In jeder Iteration wird das n\"achste Bild von Video A geladen und \texttt{skalar} auf den prozentualen Anteil der bereits vergangenen Frames gesetzt (Zeile 9).
+Es folgt eine innere for-Schleife, die jedes Pixel durchl\"auft.
+Die Laufvariable \texttt{i} nimmt dabei Vielfache von 4 an, da ein Pixel aus 4 float-Werten besteht, die sp\"ater gemeinsam geladen und verarbeitet werden.
+Zeile 14 zeigt, wie das aktuelle Pixel des Bildes in der Variablen \texttt{floatvektor} gespeichert wird.
+Diese wird in einem MMU-Register gehalten. % EDIT: UEberpruefen!
+In Zeile 15 wird dann logisch eine Skalar-Vektor-Multiplikation ausgef\"uhrt.
+Physisch werden dabei die Werte aus \texttt{floatvektor} jeweils mit einem eigenen Anteil multipliziert.
+Das aktuelle Pixel wird in Zeile 16 zur\"uck in \texttt{outputframe} geschrieben, welches dann in Zeile 19 als Bilddatei auf die Festplatte geschrieben wird.
+
+Nach dem Kompilieren wurde das gew\"unschte und erwartete Ergebnis erhalten.
+
+\section{Schlussfolgerungen}
+
+
+\end{document}
+
+
