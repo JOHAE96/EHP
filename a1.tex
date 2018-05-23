@@ -1,0 +1,245 @@
+
+\documentclass[12pt,a4paper]{scrartcl}
+
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[T1]{fontenc} 
+\usepackage[latin1]{inputenc} 
+\usepackage[ngerman]{babel}
+\usepackage[right=3cm]{geometry}
+\usepackage{wasysym} %for moon symbols
+\parindent=0pt
+\parskip=1em plus 2pt minus 1pt
+
+\topskip-2cm
+\textheight25cm
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\thepage}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+  \LARGE
+  Praktische \"Ubungen - \\
+  Experimentelle Hardwareprojekte \\
+  \bigskip
+  \Large 
+  Versuchsprotokoll
+\end{center}
+
+\vspace{1em}
+Versuch: A1 - CAE-Werkzeuge
+
+Versuchsdatum und -zeit: 26. August 2018, 10 - 13 Uhr 
+
+Betreuer: Volker D\"orsing
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
+
+Email: alexander.kuehnle@uni-jena.de
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Mark Umnus, B.Sc. Informatik, 167419
+
+Email: mark.umnus@uni-jena.de
+
+\vspace*{1cm}
+%% \mbox{}\\
+\hrule
+\vspace*{1cm}
+{\Large  Eigenst\"andigkeitserkl\"arung }
+ 
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt 
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll 
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle 
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem 
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren 
+können. \\
+
+Unterschriften: \\ 
+\hspace*{4cm} ........................................ 
+\hspace{2cm} ........................................  \\
+
+\hrule
+
+\vspace*{0.3cm}
+\textbf{Vom Betreuer auszufüllen:}
+
+Vorbereitung/Kolloquium:
+
+Durchführung:
+
+Protokoll:
+
+Gesamtbewertung:
+\clearpage
+
+
+% Hier geht das Protokoll los...
+
+\section{Vorbereitung}
+
+Die A-Versuchsreihe soll die Kenntnisse der Vorlesungen \emph{Technische Informatik} und \emph{Rechnerstrukturen} anhand der RISC-Prozessorarchitektur vertiefen.
+Dazu besch\"aftigt sich der Versuch A1 mit einer Grundstruktur, dem D-Latch.
+Das Ziel ist es, den Arbeitsablauf von der Entwicklung einer Schaltung \"uber funktionale Simulationen, Synthese, Implementierung, zeitbehaftete Simulationen bis zur Erprobung kennenzulernen.
+Das D-Latch sollte dabei mit 4-Bit-Ein- und Tristateausg\"angen, einem Takteingang (CLK) sowie zwei Steuerleitungen f\"ur das Aktivieren und Deaktivieren des Taktes (CLK\_EN) und des Ausganges (out\_en) realisiert werden.
+
+
+\section{Vorgehensweise}
+
+Uns lagen f\"ur den Versuch bereits zahlreiche Dateien vor, namentlich 
+\texttt{*.vhd} (die VHDL-Quellen),
+\texttt{tb.vhd} (die Testumgebung),
+\texttt{xc3s700an.ucf} (Vorgaben f\"ur die Implementierung, Anordnung der Anschl\"usse), 
+\texttt{synopsys\_sim.setup} (Initialisierungsdatei f\"ur Synopsys),
+\texttt{an.sh} (zur Analyse von tb.vhd),
+\texttt{fsim.sh} (zur funktionellen Simulation),
+\texttt{imp.sh} (zur Synthese und Implementierung),
+\texttt{tsim.sh} (zur zeitbehafteten Simulation)
+
+Insbesondere war eine \texttt{dlatch.vhd} gegeben, die ein D-Latch mit den Eing\"angen DATA\_IN(3:0) (4 Dateninputsignale) und CLK (Takt), den Ausg\"angen DATA\_OUT(3:0) (4 Datenausg\"ange) sowie den Steuerleitungen CLK\_EN (Aktivieren und Deaktivieren des Takes) und OUT\_EN (Hochohmigschalten der Ausg\"ange falls 1) beschreibt.
+
+Zun\"achst musste im Versuch die \texttt{tb.vhd} angepasst werden, um in den Simulationen die verschiedenen Funktionen des D-Latch zeigen und um die Eingabesignale auf ihre Funktion \"uberpr\"ufen zu k\"onnen.
+Anschlie\ss end wurde die funktionale Simulation durchgef\"uhrt und die Ergebnisse ausgedruckt.
+Im n\"achsten Schritt wurde dann mittels des gegebenen Skriptes \texttt{imp.sh} die Synthese und Implementierung vorgenommen.
+Danach wurde das Ergebnis im FPGA-Editor analysiert.
+Es folgte die zeitbehaftete Simulation, die im Vergleich zur funktionalen Simulation Zeitunterschiede ber\"ucksichtigt, die durch die Implementierung bedingt sind.
+Abschlie\ss end wurde das FPGA-System konfiguriert, sodass es mithilfe des Programmes \texttt{tst} getestet werden konnte.
+
+\emph{Anmerkung}:
+In diesem Protokoll werden des \"Ofteren die Befehle des \texttt{tst}-Programmes zur Beschreibung unseres Vorgehens verwendet. Diese sind in den Versuchsunterlagen auf Seite 9 aufgelistet.
+
+\section{Erprobung}
+
+\subsection{Funktionale Simulation}
+Hier haben wir die Funktionen \emph{Transparenz}, \emph{Speicherung}, \emph{Ausgabeunterdr\"uckung} und \emph{Taktunterdr\"ckung} gezeigt.
+Einen \"Uberblick \"uber die Funktionen bietet Tabelle \ref{wwerte}.
+In dieser bezeichnet MEMORY den in dem Moment an DATA\_IN anliegenden Wert, als $(CLK\_EN \wedge CLK) \equiv 0$ wurde.
+Damit gilt, dass die Ausgabe gleich gehalten wird, selbst wenn sich die Eingabe \"andert.
+Des weiteren gilt, dass $x,y \in \{0,1\}$ beliebige Werte darstellen.
+Der Fall DATA\_OUT = DATA\_IN in der Tabelle impliziert, dass das D-Latch transparent geschalten ist, also Daten vom Eingang direkt an den Ausgang gelangen.
+Wenn DATA\_OUT den Wert Z annimmt, bedeuted dies ein Hochohmigschalten dieses Ausganges.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l|l|r}
+    \hline
+    OUT\_EN & CLK\_EN & CLK & DATA\_OUT & Funktion\\
+    \hline
+    0       & 0       & y   & MEMORY    & Taktunterdr\"uckung\\
+    0       & 1       & 0   & MEMORY    & Speicherung\\
+    0       & 1       & 1   & DATA\_IN  & Transparenz\\
+    1       & x       & y   & Z         & Ausgabeunterdr\"uckung\\
+    \hline
+    \end{tabular}
+    \caption{Wahrheitswertabelle der Eing\"ange mit ihrer Auswirkung auf die Ausg\"ange}
+    \label{wwerte}
+\end{table}
+
+Mit den vier in Tabelle \ref{wwerte} stehenden Funktionen haben wir die Testbench erweitert und eine funktionelle Simulation durchgef\"uhrt, deren Ergebnis in Anlage 1 zu sehen ist.
+Es ergaben sich kurze Verz\"ogerungszeiten zwischen den \"Anderungen der Eing\"ange und der Reaktion an der Ausgabe von jeweils etwa 1ns.
+Die genauen Angaben stehen in Tabelle \ref{vergleich}, sind aber eher unerheblich.
+
+\subsection{Synthese und Simulation}
+Durch das Skript \texttt{imp.sh} konnten diese beiden Schritte f\"ur uns zusammengefasst werden.
+Nach der Ausf\"uhrung konnte das Ergebnis im Xilinx FPGA-Editor betrachtet werden, wobei der anschaulichste Teil in Tabelle \ref{netzliste} dargestellt ist.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    Typ     & Anzahl  & Beispielortsname \\
+    \hline
+    IBUF    & 7       & B13              \\
+    IOB     & 4       & R20              \\
+    BUFGMUX & 1       & BUFGMUX\_X2Y11   \\
+    SLICEL  & 2       & SLICE\_X52Y69    \\
+    \hline
+    \end{tabular}
+    \caption{FPGA-Komponenten der Netzliste}
+    \label{netzliste}
+\end{table}
+
+Im FPGA werden sieben Inputbuffer benutzt, n\"amlich f\"ur die vier Daten-Inputs, f\"ur CLK, CLK\_EN und OUT\_EN.
+Die vier I/O-Bl\"ocke werden f\"ur die Umsetzung von DATA\_OUT verwendet.
+In ihnen wird jeweils eine Leitung des internen Zustandes des FPGA, d.h. des Inputs seit dem letzten Mal CLK = CLK\_EN = 1, zusammen mit $\neg$OUT\_EN in ein AND-Gate gef\"uhrt und das Ergebnis an ein \texttt{PAD} weitergegeben.
+Die Slices verf\"ugen im Inneren \"uber eigene D-Latches, die die eigentliche Funktion in diesem Experiment \"ubernehmen.
+Sie sind an zwei Leitungen mit den Bezeichnungen \emph{clk\_en\_c} und \emph{clk\_c} angeschlossen, um entsprechend auf Eingaben reagieren zu k\"onnen.
+
+F\"ur den weiteren Verlauf sind die drei in diesem Schritt entstandenen Dateien \texttt{fpga.bit}, \texttt{fpga.sdf} und \texttt{fpga.vhd} bedeutend.
+Erstere enth\"alt die Informationen, die ben\"otigt werden, um das Produkt der Implementierung auf die physische Hardware zu schreiben.
+In der letzteren Datei wird der FPGA in VHDL beschrieben, um ihn in der folgenden zeitbehafteten Simulation testen zu k\"onnen.
+Die \texttt{fpga.sdf}-Datei liefert die dazu ben\"otigten Zeitinformationen, die u.a. durch die Entfernung der Bauteile voneinander verschieden von der Beschreibung des D-Latch im ersten Schritt und von anderen Implementierungen sein k\"onnen.
+
+\subsection{Zeitsimulation}
+In diesem Schritt haben wir die zeitbehaftete Simulation mittels \texttt{tsim.sh} durchgef\"uhrt.
+Das Ergebnis ist in Anlage 2 zu sehen.
+Am auff\"alligsten ist hier der Zeitunterschied zwischen der funktionalen und der zeitbehafteten Simulation, der in Tabelle \ref{vergleich} zu sehen ist.
+Gemessen wurde dabei an der entsprechenden Stelle, die in den Anlagen 1 und 2 markiert ist.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    Stelle & Verz\"ogerung funktionale Simulation & Verz\"ogerung Zeitsimulation\\
+    \hline
+    3      & 1.1                                  & 11.3  \\
+    4      & 1.1                                  & 10.6  \\
+    5      & 1.0                                  & 8.9   \\
+    \hline
+    \end{tabular}
+    \caption{Vergleich der Zeiten zwischen funktionaler und zeitbehafteter Simulation in ns}
+    \label{vergleich}
+\end{table}
+
+Als weiteren Unterschied zur funktionalen Simulation haben wir festgestellt, dass die Werte an DATA\_OUT bitweise nacheinander ge\"andert werden und nicht gleichzeitig.
+Dieses Verhalten erkennt man in Anlage 2 durch nicht so saubere \"Uberg\"ange wie in Anlage 1.
+Ein dritter Unterschied ist, dass das D-Latch in der Zeitsimulation weitaus l\"anger zur Initialisierung ben\"otigt, was sich in einem breiteren grauen Bereich zu Beginn des Experimentes an DATA\_OUT ausdr\"uckt.
+
+\subsection{Erprobung der Experimentalschaltung}
+Nachdem wir unsere \texttt{fpga.bit} wie in der Anleitung beschrieben auf das Experimentalsystem \"ubertragen haben, konnten wir es mit \texttt{tst} testen.
+Unsere Versuchsabfolge aus der Testbench lieferte die erwarteten Ergebnisse.
+Das FGPA-System startete dabei wie in den Simulationen so, dass alle Inputs au\ss er DATA\_IN auf 0 gesetzt waren und letzteres auf 0xA.
+
+\newcommand{\off}{\fullmoon}
+\newcommand{\on}{\newmoon}
+
+\begin{table}[h]
+    \centering
+    \caption{Erprobung der Experimentalschaltung mit unserer Versuchsabfolge.
+    \on\ bedeutet LED an.}
+    \begin{tabular}{l|l|l}
+    \hline
+    Stelle & \texttt{tst}-Kommado & LED-Anzeige    \\
+    \hline
+    1      & sce               & \off \off \off \off  \\
+    2      & wd 0x6            & \off \off \off \off  \\
+    3      & sck               & \off \on  \on  \off \\
+    4      & wd 0xc            & \on  \on  \off \off \\
+    5      & soe               & \off \off \off \off \\
+    6      & rck               & \off \off \off \off \\
+    7      & roe               & \on  \on  \off \off  \\
+    8      & sck               & \on  \on  \off \off \\
+    9      & rce               & \on  \on  \off \off \\
+    10     & wd 0xf            & \on  \on  \off \off \\
+    11     & sce               & \on  \on  \on  \on  \\
+    \hline
+    \end{tabular}
+    \label{erprobung}
+\end{table}
+
+Bei weiteren Versuchseingaben konnte kein unerwartetes Verhalten festgestellt werden.
+
+
+\section{Schlussfolgerungen}
+In diesem Experiment haben wir erfolgreich ein D-Latch von der Beschreibung in VHDL in eine Implementierung auf einem FPGA-System \"uberf\"uhrt.
+Dabei haben wir die einzelnen Schritte kennengelernt und verinnerlicht, sodass wir den Prozess in den n\"achsten Experimenten umsetzen k\"onnen.
+
+
+\end{document}

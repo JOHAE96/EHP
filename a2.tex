@@ -1,0 +1,205 @@
+
+\documentclass[12pt,a4paper]{scrartcl}
+
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[T1]{fontenc} 
+\usepackage[latin1]{inputenc} 
+\usepackage[ngerman]{babel}
+\usepackage[right=3cm]{geometry}
+\usepackage{wasysym} %for moon symbols
+\parindent=0pt
+\parskip=1em plus 2pt minus 1pt
+
+\topskip-2cm
+\textheight25cm
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\thepage}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+  \LARGE
+  Praktische \"Ubungen - \\
+  Experimentelle Hardwareprojekte \\
+  \bigskip
+  \Large 
+  Versuchsprotokoll
+\end{center}
+
+\vspace{1em}
+Versuch: A2 - Befehlsze\"ahler eines RISC-Prozessors
+
+Versuchsdatum und -zeit: 16. Mai 2018, 14 - 17 Uhr 
+
+Betreuer: Volker D\"orsing
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
+
+Email: alexander.kuehnle@uni-jena.de
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Mark Umnus, B.Sc. Informatik, 167419
+
+Email: mark.umnus@uni-jena.de
+
+\vspace*{1cm}
+%% \mbox{}\\
+\hrule
+\vspace*{1cm}
+{\Large  Eigenst\"andigkeitserkl\"arung }
+ 
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt 
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll 
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle 
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem 
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren 
+können. \\
+
+Unterschriften: \\ 
+\hspace*{4cm} ........................................ 
+\hspace{2cm} ........................................  \\
+
+\hrule
+
+\vspace*{0.3cm}
+\textbf{Vom Betreuer auszufüllen:}
+
+Vorbereitung/Kolloquium:
+
+Durchführung:
+
+Protokoll:
+
+Gesamtbewertung:
+\clearpage
+
+
+% Hier geht das Protokoll los...
+
+\section{Vorbereitung}
+
+
+\section{Vorgehensweise}
+
+
+\section{Erprobung}
+
+\subsection{Funktionale Simulation}
+\begin{description}
+\item [const\_sel] wird genutzt, um eine Konstante aus $\{0x00, 0x01, 0x04\}$ auszuw\"ahlen.
+\item [/const\_o1\_en] wird genutzt, um die durch const\_sel ausgew\"ahlte Konstante auf den S1\_Bus zu legen.
+\end{description}
+
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|r}
+    \hline
+    Funktion       & Signalmuster \\
+    \hline
+    auf 0 setzen   & 1100 0001 \\
+    um 0 erh\"ohen & 0110 0001 \\
+    um 1 erh\"ohen & 0110 0101 \\
+    um 4 erh\"ohen & 0110 1001 \\
+    \hline
+    \end{tabular}
+    \caption{Funktionen des Datenpfades}
+    \label{funktion}
+\end{table}
+
+
+Da der Zustand des Latches beim Start undefiniert ist, muss dieser in einem ersten Schritt mit einer 0 \"uberschrieben werden.
+Tabelle \ref{funktion} beschreibt, wie dies geht.
+Wir haben die Testbench anschlie\ss end so ange\"andert, dass 
+
+\subsection{Synthese und Implementierung}
+Diesen Schritt hat wieder \texttt{imp.sh} \"ubernommen.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l}
+    \hline
+    Typ     & Anzahl  \\
+    \hline
+    IBUF    & 8       \\ % Steuerleitungen
+    BUF     & 2       \\ % phi1, 2
+    IOB     & 16      \\ % pc_adress_out, Steuerleitungen
+    SLICEL  & 9       \\
+    \hline
+    \end{tabular}
+    \caption{FPGA-Komponenten der Netzliste}
+    \label{netzliste}
+\end{table}
+
+\subsection{Zeitsimulation}
+Dieselbe Testbench ohne \"Anderung zu \"ubernehmen hat nicht funktioniert.
+Zum einen gibt es nun die in den Arbeitsanweisungen erw\"ahnte Initialisierungszeit.
+Zum anderen liegt auf dem \texttt{adress\_out}-Bus konstant der Wert 0 statt 0, 1, 5, 0 wie bisher.
+Die Vermutung liegt nahe, dass die voreingestellte Zeit von 10ns pro Viertelperiode zu kurz ist.
+Deshalb haben wir den Wert zun\"achst auf P:= 25ns ge\"andert, den maximalen Wert, den 19 Vierteltakte in 500 ns zulassen.
+Daraufhin korrupiert der Wert von address\_out kurz nach Takt 14.
+An dieser Stelle hatten wir bisher den Fall, dass PC\_out\_en an dieser Stelle hochohmig geschalten wird, was mit der fallenden Flanke von Phi1 zusammenf\"allt.
+Wir vermuteten den Fehler an dieser Stelle, da die ALU hier m\"oglicherweise mit defekten Werten rechnete.
+Nachdem wir PC\_out\_en und dann auch const\_o2\_en jeweils einen Vierteltakt sp\"ater umgeschaltet haben, lief alles wie geplant.
+
+In dieser Ansicht sind die Busse S1 und S2 sowie Dest\_Bus nicht mehr einsehbar.
+Aus diesem Grund muss man im Folgenden eine genaue Vorstellung von den Daten haben, die auf ihnen liegen.
+Man kann nicht mehr direkt \"uberpr\"ufen, ob die eigenen Eingaben das richtige Ergebnis liefern, sondern kann im Fehlfall h\"ochstens ein paar Takte sp\"ater feststellen, \emph{dass} etwas falsch gelaufen ist.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l}
+    \hline
+    Wert Dest\_Bus & Zeit in ns \\
+    \hline
+    0              & 10.245     \\ % 5->0
+    1              & 10.226     \\ % 0->1
+    5              & 10.245     \\ % 1->5 (normale Latch-Zeiten?)
+    \hline
+    \end{tabular}
+    \caption{Vergleich der Zeiten zwischen funktionaler und zeitbehafteter Simulation in ns}
+    \label{vergleich}
+\end{table}
+
+\subsection{Erprobung der Experimentalschaltung}
+
+\newcommand{\off}{\fullmoon}
+\newcommand{\on}{\newmoon}
+
+\begin{table}[h]
+    \centering
+    \caption{Erprobung der Experimentalschaltung mit unserer Versuchsabfolge.
+    \on\ bedeutet LED an.}
+    \begin{tabular}{l|l|l}
+    \hline
+    Stelle & \texttt{tst}-Kommado & LED-Anzeige    \\
+    \hline
+    1      & sce               & \off \off \off \off  \\
+    2      & wd 0x6            & \off \off \off \off  \\
+    3      & sck               & \off \on  \on  \off \\
+    4      & wd 0xc            & \on  \on  \off \off \\
+    5      & soe               & \off \off \off \off \\
+    6      & rck               & \off \off \off \off \\
+    7      & roe               & \on  \on  \off \off  \\
+    8      & sck               & \on  \on  \off \off \\
+    9      & rce               & \on  \on  \off \off \\
+    10     & wd 0xf            & \on  \on  \off \off \\
+    11     & sce               & \on  \on  \on  \on  \\
+    \hline
+    \end{tabular}
+    \label{erprobung}
+\end{table}
+
+
+
+\section{Schlussfolgerungen}
+
+
+\end{document}
