@@ -86,12 +86,20 @@ Gesamtbewertung:
 % Hier geht das Protokoll los...
 
 \section{Vorbereitung}
+SIMD-Operationen werden heute \"uberall genutzt, wo viele Daten gleich verarbeitet werden m\"ussen, h\"aufig in Echtzeit.
+Das gilt insbesondere in der Bild- und Videoverarbeitung, in der Kommunikation und im Gamingbereich.
+Zur Vorbereitung auf das Praktikum haben wir uns mit dem Positivbeispiel AltiVec auseinandergesetzt und es mit der hier verwendeten SSE-Architektur verglichen.
 
+Ziel des Praktikums war es, zu lernen die St\"arken von SIMD zu nutzen und die Möglichkeiten der compilerseitigen Optimierung kennenzulernen.
 
 \section{Vorgehensweise}
-Zur Durchf\"uhrung war die vorgegebene Datei \texttt{simd.c} zu erweitern.
-Dazu konnten Hilfsfunktionen der \texttt{support.c}-Datei genutzt werden.
-Abschlie\ss end wurde das Makefile genutzt, um die Dateien zu kompilieren und den Film abzuspielen.
+Zum Erreichen dieses Ziels sollte der Bereich Videoverarbeitung als Beispiel dienen.
+Dazu wurden zwei Videos in Form von Frames zu Verf\"ugung gestellt, die mit Fade-Ins und Fade-Outs modifiziert werden sollten.
+Konkret war die vorgegebene Datei \texttt{simd.c} zu erweitern.
+Als Hilfestellung waren in der \texttt{support.h}-Datei Funktionen definiert, die vom aufw\"andigen Laden und Speichern der Bilder abstrahiert haben.
+Zun\"achst sollte ausgehend von einem schwarzen Bild ein Video A eingeblendet werden, anschlie\ss end in ein Video B \"ubergehen, welches schlie\ss lich in ein gr\"unes Bild ausgeblendet werden sollte.
+Zum Abschluss jeder Teilaufgabe wurde das Makefile genutzt, um die Dateien zu kompilieren und den Film abzuspielen.
+Final sollte ein Einblick in die Compilerausgabe gewonnen werden, indem der Assemblercode zu betrachten war.
 
 
 \section{Erprobung}
