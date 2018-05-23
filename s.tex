@@ -103,11 +103,14 @@ Final sollte ein Einblick in die Compilerausgabe gewonnen werden, indem der Asse
 
 
 \section{Erprobung}
+
+\subsection{Anzeige eines schwarzen Bildes f\"ur zwei Sekunden}
 In der ersten Aufgabe 3.1 musste lediglich der vorgegebene Code aktiviert werden, indem die Pr\"aprozessordirektive von 0 auf 1 gesetzt wurde.
 Dieser Teil hatte den Effekt eine zweisek\"undige Sequenz mit einem schwarzen Bildschirm einzublenden.
 Das Makefile konnte zun\"achst nicht ohne Weiteres genutzt werden, da der eingestellte Media Player \emph{mplayer} nicht installiert war.
 Die entsprechende Zeile haben wir durch den Player \emph{totem} ge\"andert.
 
+\subsection{Einblenden des Videos \emph{A} f\"ur zwei Sekunden}
 Die zweite Aufgabe bestand darin, das Video A \"uber einen Zeitraum von 2 Sekunden einzublenden.
 Dazu waren die Zeilen 14-16 von Listing \ref{a3.2} hinzuzuf\"ugen, der Rest war gegeben.
 
@@ -145,6 +148,109 @@ Physisch werden dabei die Werte aus \texttt{floatvektor} jeweils mit einem eigen
 Das aktuelle Pixel wird in Zeile 16 zur\"uck in \texttt{outputframe} geschrieben, welches dann in Zeile 19 als Bilddatei auf die Festplatte geschrieben wird.
 
 Nach dem Kompilieren wurde das gew\"unschte und erwartete Ergebnis erhalten.
+
+\subsection{Anzeige des Videos \emph{A} f\"ur zwei Sekunden}
+F\"ur diesen Teil konnte einfach der Beispielcode aus der Versuchsbeschreibung verwendet werden (Listing \ref{a3.3}).
+
+\begin{lstlisting}[caption=Abspielen des Videos \emph{A}, label=a3.3]
+fade_duration = 2.0 * 25.0;
+for (frame = 0; frame < (int) fade_duration; frame++) {
+    load_next_frame_from_videoA (inputframeA);
+    save_frame(inputframeA);
+}
+\end{lstlisting}
+
+\subsection{\"Uberblendung des Videos \emph{A} in Video \emph{B} f\"ur vier Sekunden}
+In dieser Aufgabe war der Gro\ss teil schon vorgegeben, inklusive der Formel zur Berechnung.
+Es mussten lediglich die Zeilen 6 und 7, sowie 15 bis 23 in Listing \ref{a3.4} erg\"anzt werden.
+
+\begin{lstlisting}[caption=\"Uberblendung des Videos \emph{A} in Video {B}, label=a3.4]
+fade_duration = 4.0 * 25.0;
+
+for (frame = 0; frame < (int) fade_duration; frame++)
+{
+    __m128 alpha, beta;
+    beta = _mm_set1_ps (((float) frame) / fade_duration);
+    alpha = _mm_sub_ps (_mm_set1_ps (1.0f), beta);
+
+    load_next_frame_from_videoA(inputframeA);
+    load_next_frame_from_videoB(inputframeB);
+
+    for (i=0; i < IMAGE_SIZE * 4; i+= 4)
+    {
+        __m128 vektorA, vektorB, ergebnis;
+        vektorA = _mm_load_ps (&inputframeA[i]);
+        vektorB = _mm_load_ps (&inputframeB[i]);
+
+        __m128 betaB, alphaA;
+        alphaA = _mm_mul_ps (alpha, vektorA);
+        betaB = _mm_mul_ps (beta, vektorB);
+        ergebnis = _mm_add_ps (betaB, alphaA);
+
+        _mm_store_ps (&outputframe[i], ergebnis);
+    }
+    save_frame (outputframe);
+}
+\end{lstlisting}
+
+An dieser Stelle sei darauf hingewiesen, dass wir abweichend von der Vorgabe $outputframe = \alpha \cdot inputframeA + \beta \cdot inputframeB$ mit $\alpha = (1 - \beta)$ berechnen, um $\beta$ von $0\rightarrow1$ laufen lassen zu k\"onnen und nicht umgekehrt.
+W\"urde man die gegebene Formel mit $\beta$ von $0\rightarrow1$ nutzen, h\"atte man einen Sprung von Video \emph{A} nach Video \emph{B} mit anschlie\ss endem Fade-Over zur\"uck zu Video \emph{A}.
+
+Die \"au\ss ere Schleife ist analog zu der in Listing \ref{a3.3}.
+In Zeile 7 wird das vektorwertige \texttt{alpha} auf $1-\beta$ gesetzt.
+Der Hauptteil geschieht in den Zeilen 19 bis 21, wo die Rechnung in zwei Schritten ausgef\"uhrt wird.
+Zun\"achst werden \texttt{alphaA} (sprich: alpha mal A) und \texttt{betaB} nach der Fade-Formel von Aufgabe 3.2 berechnet.
+Es folgt eine Summation der Teilergebnisse.
+Der Rest (innere Schleife und das Laden und Schreiben der Input- und Outputdaten) erfolgt wie in Aufgabe 3.2.
+
+\subsection{Anzeige des Videos \emph{B} f\"ur zwei Sekunden}
+Dieser Teil ist analog zu Aufgabe 3.2:
+\begin{lstlisting}[caption=Abspielen des Videos \emph{B}, label=a3.5]
+fade_duration = 2.0 * 25.0;
+for (frame = 0; frame < (int) fade_duration; frame++) {
+    load_next_frame_from_videoA (inputframeB);
+    save_frame(inputframeB);
+}
+\end{lstlisting}
+
+\subsection{Ausblendung des Videos \emph{B} f\"ur zwei Sekunden nach Gr\"un}
+Diese Aufgabe wurde im Prinzip mithilfe des Codes aus Listing \ref{a3.4} gel\"ost mit dem Unterschied, dass Video \emph{A} durch ein konstant gr\"unes Bild ersetzt wurde:
+
+\begin{lstlisting}[caption=\"Uberblendung des Videos \emph{B} nach gr\"un, label=a3.6]
+fade_duration = 2.0 * 25.0;
+
+__m128 green;
+green = _mm_set_ps (0.0f, 0.0f, 1.0f, 0.0f);
+    
+for (frame = 0; frame < (int) fade_duration; frame++)
+{
+    __m128 alpha, beta;
+    beta = _mm_set1_ps (((float) frame) / fade_duration);
+    alpha = _mm_sub_ps (_mm_set1_ps (1.0f), beta);
+
+    load_next_frame_from_videoB(inputframeB);
+
+    for (i=0; i < IMAGE_SIZE * 4; i+= 4)
+    {
+        __m128 vektorB, ergebnis;
+        vektorB = _mm_load_ps (&inputframeB[i]);
+
+        __m128 betagreen, alphaB;
+        alphaB = _mm_mul_ps (alpha, vektorB);
+        betagreen = _mm_mul_ps (beta, green);
+        ergebnis = _mm_add_ps (betagreen, alphaB);
+            
+        _mm_store_ps (&outputframe[i], ergebnis);
+    }
+    save_frame(outputframe);
+}
+\end{lstlisting}
+
+Die wichtigste Ver\"anderung steht damit in den Zeilen 3 und 4.
+Die Farbe gr\"un wird per RGBA-Vektor dargestellt, dessen Komponenten jedoch in der Reihenfolge [A, B, G, R] eingegeben werden m\"ussen.
+M\"ochte man die maximale Farbintensit\"at erreichen, muss man den entsprechenden float-Wert auf 1.0f setzen.
+Man nutzt also eine relative Skala anstelle der Werte von 0 bis 255, da float-Werte auf dem Intervall $[0,\pm1]$ am genausten sind, w\"ahrend bei gr\"o\ss eren Zahlen die Abst\"ande zwischen den diskreten Werten des Datentyps float ebenfalls immer gr\"o\ss er werden.\\
+Mit diesem gr\"unen Pixel wird nun die Fade-Over-Berechnung f\"ur Video \emph{B} durchgef\"uhrt, so als ob \texttt{green} ein komplettes Bild w\"are.
 
 \section{Schlussfolgerungen}
 
