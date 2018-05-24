@@ -3,8 +3,8 @@
 
 \usepackage{fancyhdr}
 \usepackage{times}
-\usepackage[T1]{fontenc} 
-\usepackage[latin1]{inputenc} 
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
 \usepackage[ngerman]{babel}
 \usepackage[right=3cm]{geometry}
 \usepackage{wasysym} %for moon symbols
@@ -26,14 +26,14 @@
   Praktische \"Ubungen - \\
   Experimentelle Hardwareprojekte \\
   \bigskip
-  \Large 
+  \Large
   Versuchsprotokoll
 \end{center}
 
 \vspace{1em}
 Versuch: A2 - Befehlsze\"ahler eines RISC-Prozessors
 
-Versuchsdatum und -zeit: 16. Mai 2018, 14 - 17 Uhr 
+Versuchsdatum und -zeit: 16. Mai 2018, 14 - 17 Uhr
 
 Betreuer: Volker D\"orsing
 
@@ -52,28 +52,28 @@ Email: mark.umnus@uni-jena.de
 \hrule
 \vspace*{1cm}
 {\Large  Eigenst\"andigkeitserkl\"arung }
- 
-Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
-und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt 
-haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll 
-als nicht bestanden bewertet wird und damit das Modul ``Experimentelle 
-Hardwareprojekte'' als nicht bestanden bewertet wird. \\
-Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem 
-Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren 
-können. \\
 
-Unterschriften: \\ 
-\hspace*{4cm} ........................................ 
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren
+k\"onnen. \\
+
+Unterschriften: \\
+\hspace*{4cm} ........................................
 \hspace{2cm} ........................................  \\
 
 \hrule
 
 \vspace*{0.3cm}
-\textbf{Vom Betreuer auszufüllen:}
+\textbf{Vom Betreuer auszuf\"ullen:}
 
 Vorbereitung/Kolloquium:
 
-Durchführung:
+Durchf\"uhrung:
 
 Protokoll:
 
@@ -84,10 +84,18 @@ Gesamtbewertung:
 % Hier geht das Protokoll los...
 
 \section{Vorbereitung}
-
+In Versuch A2 wird der Befehlsz\"ahler der DLXJ-Prozessorarchitektur n\"aher betrachtet.
+Ziel des Versuches ist es, die ben\"otigten Signalfolgen zu verstehen, damit der Befehlsz\"ahler korrekt funktioniert.
+Dazu sollten wir in der funktionalen und zeitbehafteten Simulation den Befehlsz\"ahler untersuchen und verstehen, unter welchen Vorraussetzungen
+die Funktionen des Befehlsz\"ahlers ausgef\"uhrt werden k\"onnen.
 
 \section{Vorgehensweise}
 
+Uns lagen f\"ur den Versuch mehrere Dateien vor: F\"ur die Testumgebung eine \texttt{tb.vhd} und weitere \texttt{*.vhd} f\"ur die Beschreibung der Komponenten des Befehlsz\"ahlers. Au\ss erdem wurden uns, analog zu Versuch A1, die Skripte \texttt{fsim.sh} und \texttt{tsim.sh} f\"ur die Analysen und \texttt{imp.sh} fÃ¼r Synthese und Implementierung, zur Verf\"ugung gestellt.
+
+Zuerst sollten wir die \texttt{tb.vhd} \"andern, um die verschiedenen Funktionen des Befehlsz\"ahlers simulieren. Danach wurde die funktionale Simulation durchgef\"uhrt, in der wir mithilfe der angelegten Signale die Schaltung untersuchten. Hier sollten wir verstehen, welche Signalfolgen ben\"otigt werden, um gew\"unschte Funktionen des Befehlsz\"ahlers nutzen zu k\"onnen. Daraufhin wurden die VHDL-Beschreibungen implementiert, synthetisiert und kurz mit dem FPGA-Editor auf die Anzahl der Komponenten untersucht. Dann wurde dann die zeitbehaftete Simulation durchgef\"uhrt. Es wurden wieder die Schaltung mithilfe der angelegten Signalen analysiert und Zeitmessungen durchgef\"uhrt. Hier musste die \texttt{tb.vhd} ein weiteres mal bearbeitet werden, da hier die technisch bedingten Zeitunterschiede ber\"ucksichtigt werden mussten. Schlie\ss lich wurde das FPGA-System konfiguriert und die Funktion des Befehlsz\"ahlers mithilfe des Programmes \texttt{prob} getestet.
+
+\newpage
 
 \section{Erprobung}
 
@@ -117,7 +125,7 @@ Gesamtbewertung:
 
 Da der Zustand des Latches beim Start undefiniert ist, muss dieser in einem ersten Schritt mit einer 0 \"uberschrieben werden.
 Tabelle \ref{funktion} beschreibt, wie dies geht.
-Wir haben die Testbench anschlie\ss end so ange\"andert, dass 
+Wir haben die Testbench anschlie\ss end so ange\"andert, dass
 
 \subsection{Synthese und Implementierung}
 Diesen Schritt hat wieder \texttt{imp.sh} \"ubernommen.
