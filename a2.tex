@@ -1,4 +1,3 @@
-
 \documentclass[12pt,a4paper]{scrartcl}
 
 \usepackage{fancyhdr}
@@ -91,20 +90,29 @@ die Funktionen des Befehlsz\"ahlers ausgef\"uhrt werden k\"onnen.
 
 \section{Vorgehensweise}
 
-Uns lagen f\"ur den Versuch mehrere Dateien vor: F\"ur die Testumgebung eine \texttt{tb.vhd} und weitere \texttt{*.vhd} f\"ur die Beschreibung der Komponenten des Befehlsz\"ahlers. Au\ss erdem wurden uns, analog zu Versuch A1, die Skripte \texttt{fsim.sh} und \texttt{tsim.sh} f\"ur die Analysen und \texttt{imp.sh} für Synthese und Implementierung, zur Verf\"ugung gestellt.
+Uns lagen f\"ur den Versuch mehrere Dateien vor: F\"ur die Testumgebung eine \texttt{tb.vhd} und weitere \texttt{*.vhd} f\"ur die Beschreibung der Komponenten des Befehlsz\"ahlers. Au\ss erdem wurden uns, analog zu Versuch A1, die Skripte \texttt{fsim.sh} und \texttt{tsim.sh} f\"ur die Analysen und \texttt{imp.sh} f\"ur Synthese und Implementierung, zur Verf\"ugung gestellt.
 
 Zuerst sollten wir die \texttt{tb.vhd} \"andern, um die verschiedenen Funktionen des Befehlsz\"ahlers simulieren. Danach wurde die funktionale Simulation durchgef\"uhrt, in der wir mithilfe der angelegten Signale die Schaltung untersuchten. Hier sollten wir verstehen, welche Signalfolgen ben\"otigt werden, um gew\"unschte Funktionen des Befehlsz\"ahlers nutzen zu k\"onnen. Daraufhin wurden die VHDL-Beschreibungen implementiert, synthetisiert und kurz mit dem FPGA-Editor auf die Anzahl der Komponenten untersucht. Dann wurde dann die zeitbehaftete Simulation durchgef\"uhrt. Es wurden wieder die Schaltung mithilfe der angelegten Signalen analysiert und Zeitmessungen durchgef\"uhrt. Hier musste die \texttt{tb.vhd} ein weiteres mal bearbeitet werden, da hier die technisch bedingten Zeitunterschiede ber\"ucksichtigt werden mussten. Schlie\ss lich wurde das FPGA-System konfiguriert und die Funktion des Befehlsz\"ahlers mithilfe des Programmes \texttt{prob} getestet.
+
 
 \newpage
 
 \section{Erprobung}
 
 \subsection{Funktionale Simulation}
+Im folgenden werden erst die verschiedenen Signale aufgelistet und dessen Funktion beschrieben.
 \begin{description}
-\item [const\_sel] wird genutzt, um eine Konstante aus $\{0x00, 0x01, 0x04\}$ auszuw\"ahlen.
-\item [/const\_o1\_en] wird genutzt, um die durch const\_sel ausgew\"ahlte Konstante auf den S1\_Bus zu legen.
+\item [\texttt{const\_sel}] wird genutzt, um eine Konstante aus $\{0x00, 0x01, 0x04\}$ auszuw\"ahlen.
+\item [\texttt{/const\_o1\_en}] wird genutzt, um die durch \texttt{const\_sel} ausgew\"ahlte Konstante auf den S1\_Bus zu legen.
+\item [\texttt{/const\_o2\_en}] wird genutzt, um die durch \texttt{const\_sel} ausgew\"ahlte Konstante auf den S2\_Bus zu legen.
+\item [\texttt{PC\_latch\_en}] wird genutzt, um das Zulassen von Eingaben aus dem \texttt{Dest\_bus} zu aktivieren oder deaktivieren.
+\item [\texttt{PC\_out\_en}] wird genutzt, den Ausgang des Befehlsz\"ahlers hochohmig zu schalten.
+\item [\texttt{PC\_addr\_out}] ist der Bus, um den Inhalt des Befehlsz\"ahlers an den Speicher zu leiten.
+\item [\texttt{PHI\_1}] ist ein Takt, der die Eingabelatches f\"ur die ALU steuert, mit der der Befehlsz\"ahler hochz\"ahlt.
+\item [\texttt{PHI\_2}] ist ein Takt, der um eine halbe Periode von \texttt{PHI\_1} verschoben ist und den Latch des Befehls\"ahlers steuert.
 \end{description}
 
+In der Tabelle \ref{funktion} werden die verschiedenen Funktionen des Befehlsz\"ahlers und dessen ben\"otigten Signalfolgen aufgezeigt. Die Notation der Signalmuster wurde hier aus dem Kapitel 2.2 auf Seite 4 aus der Versuchsvorbereitung entnommen.
 
 \begin{table}[h]
     \centering
@@ -122,10 +130,19 @@ Zuerst sollten wir die \texttt{tb.vhd} \"andern, um die verschiedenen Funktionen
     \label{funktion}
 \end{table}
 
-
 Da der Zustand des Latches beim Start undefiniert ist, muss dieser in einem ersten Schritt mit einer 0 \"uberschrieben werden.
 Tabelle \ref{funktion} beschreibt, wie dies geht.
-Wir haben die Testbench anschlie\ss end so ange\"andert, dass
+
+Wir haben die Testbench anschlie\ss end so abge\"andert, dass die aufgelisteten Funktionen des Befehlsz\"ahlers in der funktionalen Analyse n\"aher analysiert werden k\"onnen. Eine \"Ubersicht der funktionalen Simulation kann auf der Anlage 1 betrachtet werden. Durch die funktionale Analyse konnten wir folgendes feststellen:
+
+\begin{itemize}
+  \item Daten gelangen vom Konstantenspeicher auf den \texttt{S1\_Bus} bzw. \texttt{S2\_Bus}, indem man mit \texttt{/const\_o1\_en} und/oder \texttt{/const\_o2\_en} die gew\"unschten Ausg\"ange f\"ur die jeweiligen Busse ausw\"ahlt und per \texttt{const\_sel} die Konstante w\"ahlt. Au\ss erdem muss mit \texttt{PC\_out\_en} der Ausgang des Bef\"ehlsz\"ahlers hochohmig geschalten werden, falls man vom Konstantenspeicher auf den \texttt{S2\_Bus} \"ubertragen will, um Konflikte zu vermeiden.
+  \item Das Resultat der ALU ist stabil, nachdem der Takt \texttt{PHI\_1} ausgelaufen ist. Dann liegen n\"amlich in den Eingangslatches die beiden letzten Werte, die kurz vom dem Umschalten des Taktes auf 0 auf den Latches lagen (Siehe Transparenz von Latches, wie in Versuch A1 untersucht worden ist).
+  \item Der Inhalt des Befehlsz\"ahlers ist stabil, wenn entweder \texttt{PC\_latch\_en} oder \texttt{PHI\_2} auf 0 geschaltet wird.
+  \item Der Inhalt des Befehlsz\"ahlers wird konstant auf den Adress-Bus gegeben.
+  \item der Inhalt des Befehlsz\"ahlers wird auf den \texttt{S2\_Bus} gelegt, wenn \texttt{/PC\_out\_en} auf 0 liegt. Dabei sollte ber\"ucksichtigt werden, dass \texttt{/const\_o2\_en} auf 1 liegt, damit es keine Komplikationen zwischen den Ausgaben des Konstantenspeichers und des Befehlsz\"ahler gibt.
+\end{itemize}
+
 
 \subsection{Synthese und Implementierung}
 Diesen Schritt hat wieder \texttt{imp.sh} \"ubernommen.
@@ -147,19 +164,23 @@ Diesen Schritt hat wieder \texttt{imp.sh} \"ubernommen.
 \end{table}
 
 \subsection{Zeitsimulation}
-Dieselbe Testbench ohne \"Anderung zu \"ubernehmen hat nicht funktioniert.
+Dieselbe Testbench ohne \"Anderung zu \"ubernehmen hat nicht funktioniert. Die resultierende Simulation mit dieser Testbench kann in Anlage 2 betrachtet werden.
 Zum einen gibt es nun die in den Arbeitsanweisungen erw\"ahnte Initialisierungszeit.
 Zum anderen liegt auf dem \texttt{adress\_out}-Bus konstant der Wert 0 statt 0, 1, 5, 0 wie bisher.
 Die Vermutung liegt nahe, dass die voreingestellte Zeit von 10ns pro Viertelperiode zu kurz ist.
-Deshalb haben wir den Wert zun\"achst auf P:= 25ns ge\"andert, den maximalen Wert, den 19 Vierteltakte in 500 ns zulassen.
+Deshalb haben wir den Wert zun\"achst auf P:= 25ns ge\"andert, den maximalen Wert, den 19 Vierteltakte in 500 ns zulassen. Die Simulation mit dieser Zeitanpassung liegt ausgedruckt als Anlage 3 bei.
 Daraufhin korrupiert der Wert von address\_out kurz nach Takt 14.
 An dieser Stelle hatten wir bisher den Fall, dass PC\_out\_en an dieser Stelle hochohmig geschalten wird, was mit der fallenden Flanke von Phi1 zusammenf\"allt.
 Wir vermuteten den Fehler an dieser Stelle, da die ALU hier m\"oglicherweise mit defekten Werten rechnete.
-Nachdem wir PC\_out\_en und dann auch const\_o2\_en jeweils einen Vierteltakt sp\"ater umgeschaltet haben, lief alles wie geplant.
+Nachdem wir PC\_out\_en und dann auch const\_o2\_en jeweils einen Vierteltakt sp\"ater umgeschaltet haben, lief alles wie geplant. Die ausgedruckte Simulation mit dieser Anpassung liegt als Anlage 4 bei.
 
 In dieser Ansicht sind die Busse S1 und S2 sowie Dest\_Bus nicht mehr einsehbar.
 Aus diesem Grund muss man im Folgenden eine genaue Vorstellung von den Daten haben, die auf ihnen liegen.
 Man kann nicht mehr direkt \"uberpr\"ufen, ob die eigenen Eingaben das richtige Ergebnis liefern, sondern kann im Fehlfall h\"ochstens ein paar Takte sp\"ater feststellen, \emph{dass} etwas falsch gelaufen ist.
+
+Daraufhin haben wir die Verz\"ogerungen zwischen \texttt{PHI\_2 $\uparrow$} und \texttt{PC\_addr\_out} f\"ur verschiede Werte des Befehlsz\"ahlers gemessen. Die Messungen sind in Tabelle \ref{vergleich} dargestellt. Eine Beispielmessung liegt auch ausgedruckt als Anlage 5 vor.
+% TODO: ggf. Erklärung, warum gleich
+
 
 \begin{table}[h]
     \centering
@@ -172,11 +193,15 @@ Man kann nicht mehr direkt \"uberpr\"ufen, ob die eigenen Eingaben das richtige 
     5              & 10.245     \\ % 1->5 (normale Latch-Zeiten?)
     \hline
     \end{tabular}
-    \caption{Vergleich der Zeiten zwischen funktionaler und zeitbehafteter Simulation in ns}
+    \caption{Vergleich der Zeiten zwischen funktionaler und zeitbehafteter Simulation in ns.}
     \label{vergleich}
 \end{table}
 
 \subsection{Erprobung der Experimentalschaltung}
+
+Hier wurde wieder, analog zum Versuch A1, das Experimentalsystem mit dem Befehl \texttt{konf fpga.bit} konfiguriert, woraufhin wir mit dem Programm \texttt{prog} das System testen konnten.
+
+% TODO: Signalfolgen protokollieren, Funktionen dokumentieren, Eingaben begründen
 
 \newcommand{\off}{\fullmoon}
 \newcommand{\on}{\newmoon}
@@ -208,6 +233,7 @@ Man kann nicht mehr direkt \"uberpr\"ufen, ob die eigenen Eingaben das richtige 
 
 
 \section{Schlussfolgerungen}
+In diesem Experiment haben wir erfolgreich ein Teil des Datenpfades, insbesondere den Befehlsz\"ahler untersuchen k\"onnen. Hierbei konnten wir beobachten, wie ein Befehlsz\"ahler funktioniert und welche Signalfolgen f\"ur welche Funktionen ben\"otigt werden. Dabei war die Zeitbehaftete Analyse besonders interessant. Einerseits, weil die Testbench neu bearbeitet werden musste, \"uberhaupt eine korrekte Analyse durchf\"uhren zu k\"onnen. Andererseits, weil wir die Busse nicht konkret beobachten konnten, welches die Analyse etwas erschwert hat.
 
 
 \end{document}
