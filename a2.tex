@@ -95,8 +95,8 @@ Uns lagen f\"ur den Versuch mehrere Dateien vor: F\"ur die Testumgebung eine \te
 Zuerst sollten wir die \texttt{tb.vhd} \"andern, um die verschiedenen Funktionen des Befehlsz\"ahlers zu simulieren.
 Danach wurde die funktionale Simulation durchgef\"uhrt, in der wir mithilfe der angelegten Signale die Schaltung untersuchten.
 Hier sollten wir verstehen, welche Signalfolgen ben\"otigt werden, um gew\"unschte Funktionen des Befehlsz\"ahlers nutzen zu k\"onnen.
-Daraufhin wurden die VHDL-Beschreibungen implementiert, synthetisiert und kurz mit dem FPGA-Editor auf die Anzahl der Komponenten untersucht.
-Dann wurde dann die zeitbehaftete Simulation durchgef\"uhrt. Es wurden wieder die Schaltung mithilfe der angelegten Signalen analysiert und Zeitmessungen durchgef\"uhrt.
+Daraufhin wurden die VHDL-Beschreibungen synthetisiert, implementiert und kurz mit dem FPGA-Editor auf die Anzahl der Komponenten untersucht.
+Dann wurde dann die zeitbehaftete Simulation durchgef\"uhrt. Es wurde wieder die Schaltung mithilfe der angelegten Signalen analysiert und Zeitmessungen durchgef\"uhrt.
 Hier musste die \texttt{tb.vhd} ein weiteres mal bearbeitet werden, da hier die technisch bedingten Zeitunterschiede ber\"ucksichtigt werden mussten.
 Schlie\ss lich wurde das FPGA-System konfiguriert und die Funktion des Befehlsz\"ahlers mithilfe des Programmes \texttt{prob} getestet.
 
@@ -112,7 +112,7 @@ Im folgenden werden erst die verschiedenen Signale aufgelistet und dessen Funkti
 \item [\texttt{/const\_o1\_en}] wird genutzt, um die durch \texttt{const\_sel} ausgew\"ahlte Konstante auf den S1\_Bus zu legen.
 \item [\texttt{/const\_o2\_en}] wird genutzt, um eine 0 auf den S2\_Bus zu legen.
 \item [\texttt{PC\_latch\_en}] wird genutzt, um das Zulassen von Eingaben aus dem \texttt{Dest\_bus} zu aktivieren oder deaktivieren.
-\item [\texttt{PC\_out\_en}] wird genutzt, den Ausgang des Befehlsz\"ahlers hochohmig zu schalten.
+\item [\texttt{PC\_out\_en}] wird genutzt, um den Ausgang des Befehlsz\"ahlers hochohmig zu schalten.
 \item [\texttt{PC\_addr\_out}] ist der Bus, um den Inhalt des Befehlsz\"ahlers an den Speicher zu leiten.
 \item [\texttt{PHI\_1}] ist ein Takt, der die Eingabelatches f\"ur die ALU steuert, mit der der Befehlsz\"ahler hochz\"ahlt.
 \item [\texttt{PHI\_2}] ist ein Takt, der um eine halbe Periode von \texttt{PHI\_1} verschoben ist und den Latch des Befehlsz\"ahlers steuert.
@@ -140,7 +140,7 @@ Zum Anwenden der gew\"unschten \"Anderung gem\"a\ss \ Tabelle \ref{funktion} mus
 
 In diesem Experiment wurde mit einer 8-Bit-Architektur gearbeitet, was bedeutet, dass 8-Bit-Busse benutzt werden.
 Dies impliziert, dass auch Befehle jeweils 8 Bit lang sind.
-M\"ochte man nun den jeweils n\"achsten Befehl aus dem Speicher laden, so muss man den Befehlsz\"ahler um 1 erh\"ohen, da Speicher f\"ur gew\"ohnlich byteaddresierbar sind.
+M\"ochte man nun den jeweils n\"achsten Befehl aus dem Speicher laden, so muss man den Befehlsz\"ahler um 1 erh\"ohen, da Speicher f\"ur gew\"ohnlich byteadressierbar sind.
 Dies ist also die Standardfunktion des Befehlsz\"ahlers.
 Bei einer 32-Bit-Architektur m\"usste man entsprechend 4 zur aktuellen Adresse addieren, um den n\"achsten Befehl zu erhalten.
 
@@ -152,7 +152,7 @@ Eine \"Ubersicht der funktionalen Simulation kann auf der Anlage 1 betrachtet we
 Durch die funktionale Analyse konnten wir Folgendes feststellen:
 
 \begin{itemize}
-  \item Daten gelangen vom Konstantenspeicher auf den \texttt{S1\_Bus} bzw. \texttt{S2\_Bus}, indem man mit \texttt{/const\_o1\_en} und/oder \texttt{/const\_o2\_en} die gew\"unschten Ausg\"ange f\"ur die jeweiligen Busse ausw\"ahlt und per \texttt{const\_sel} die Konstante w\"ahlt. Au\ss erdem muss mit \texttt{PC\_out\_en} der Ausgang des Bef\"ehlsz\"ahlers hochohmig geschalten werden, falls man vom Konstantenspeicher auf den \texttt{S2\_Bus} \"ubertragen will, um Konflikte zu vermeiden.
+  \item Daten gelangen vom Konstantenspeicher auf den \texttt{S1\_Bus}, indem man mit dem Signal \texttt{/const\_o1\_en} den Ausgang aktiviert und per \texttt{const\_sel} die Konstante w\"ahlt. Auf den \texttt{S2\_Bus} kann mit \texttt{/const\_o2\_en} nur eine 0 angelegt werden. Au\ss erdem muss mit \texttt{PC\_out\_en} der Ausgang des Befehlsz\"ahlers hochohmig geschalten werden, falls man vom Konstantenspeicher auf den \texttt{S2\_Bus} \"ubertragen will, um Konflikte zu vermeiden.
   \item Das Resultat der ALU ist stabil, nachdem der Takt \texttt{PHI\_1} ausgelaufen ist. Dann liegen n\"amlich in den Eingangslatches die beiden letzten Werte, die kurz vom dem Umschalten des Taktes auf 0 auf den Latches lagen (Siehe Transparenz von Latches, wie in Versuch A1 untersucht worden ist).
   \item Der Inhalt des Befehlsz\"ahlers ist stabil, wenn entweder \texttt{PC\_latch\_en} oder \texttt{PHI\_2} auf 0 geschaltet wird.
   \item Der Inhalt des Befehlsz\"ahlers wird konstant auf den Adress-Bus gegeben.
@@ -183,11 +183,11 @@ Tabelle \ref{netzliste} zeigt die Komponenten, die dabei verwendet werden.
 \subsection{Zeitsimulation}
 Dieselbe Testbench ohne \"Anderung zu \"ubernehmen hat nicht funktioniert. Die resultierende Simulation mit dieser Testbench kann in Anlage 2 betrachtet werden.
 Zum einen gibt es nun die in den Arbeitsanweisungen erw\"ahnte Initialisierungszeit.
-Zum anderen liegt auf dem \texttt{PC\_adr\_out}-Bus konstant der Wert 0 statt 0, 1, 5, 0 wie bisher.
+Zum anderen liegt auf dem \texttt{PC\_addr\_out}-Bus konstant der Wert 0 statt 0, 1, 5, 0 wie bisher.
 Die Vermutung liegt nahe, dass die voreingestellte Zeit von 10ns pro Viertelperiode zu kurz ist.
 Deshalb haben wir den Wert zun\"achst auf P:= 25ns ge\"andert, den maximalen Wert, den 19 Vierteltakte in 500 ns zulassen. Die Simulation mit dieser Zeitanpassung liegt ausgedruckt als Anlage 3 bei.
-Daraufhin korrupiert der Wert von \texttt{PC\_address\_out} kurz nach Takt 14.
-An dieser Stelle hatten wir bisher den Fall, dass \texttt{PC\_out\_en} an dieser Stelle hochohmig geschalten wird, was mit der fallenden Flanke von Phi1 zusammenf\"allt.
+Daraufhin korrupiert der Wert von \texttt{PC\_addr\_out} kurz nach Takt 14.
+An dieser Stelle hatten wir bisher den Fall, dass \texttt{PC\_out\_en} an dieser Stelle hochohmig geschalten wird, was mit der fallenden Flanke von \texttt{PHI\_1} zusammenf\"allt.
 Wir vermuteten den Fehler an dieser Stelle, da die ALU hier m\"oglicherweise mit defekten Werten rechnete.
 Nachdem wir \texttt{PC\_out\_en} und dann auch \texttt{const\_o2\_en} jeweils einen Vierteltakt sp\"ater umgeschaltet haben, lief alles wie geplant.
 Die ausgedruckte Simulation mit dieser Anpassung liegt als Anlage 4 bei.
@@ -221,7 +221,13 @@ Unsere Erkl\"arung daf\"ur ist, dass es 10.226ns ben\"otigt, um das unterste Bit
 
 Hier wurde wieder, analog zum Versuch A1, das Experimentalsystem mit dem Befehl \texttt{konf fpga.bit} konfiguriert, woraufhin wir mit dem Programm \texttt{prog} das System testen konnten.
 
-% TODO: Signalfolgen protokollieren, Funktionen dokumentieren, Eingaben begründen
+Wir haben dabei in Tabelle \ref{erprobung} unsere Eingaben des Programmes dokumentiert.
+In der Tabelle bedeutet "xy", dass im Befehlsz\"ahler beliebige Werte stehen k\"onnten.
+Zeilen 2 - 5 demonstrieren dabei das Setzen des Befehlsz\"ahlers auf 0x00.
+In den Zeilen 6 - 9 wird dann das Hochz\"ahlen des Befehlsz\"ahlers konfiguriert.
+In Zeile 7 kann dabei die Schrittweite des Hochz\"ahlens eingestellt werden.
+Zur Demonstration haben wir 0x01 gew\"ahlt, aber auch andere Schrittweiten ausgef\"uhrt.
+Dabei traten die erwarteten Ergebnisse auf.
 
 \newcommand{\off}{\fullmoon}
 \newcommand{\on}{\newmoon}
@@ -234,28 +240,28 @@ Hier wurde wieder, analog zum Versuch A1, das Experimentalsystem mit dem Befehl 
     \hline
     Schritt & \texttt{prog}-Kommado & LED-Anzeige  & 7-Segment-Anzeige \\
     \hline
-    1  & sple & \on \on \on \on  \off \off \off \on           & xy
-    2  & cs0  & \on \on \on \on  \off \off \off \on           & xy
-    3  & rce1 & \on \on \on \off  \off \off \off \on           & xy
-    4  & rce2 & \on \on \off \off  \off \off \off \on           & xy
-    5  & rck  & \on \on \off \off  \off \off \on \off           & 00
-    6  & sce2 & \on \on \on \off  \off \off \on \off           & 00
-    7  & cs1  & \on \on \on \off  \off \on \on \off           & 00
-    8  & rpoe & \off \on \on \off  \off \on \on \off           & 00
-    9  & sck  & \off \on \on \off  \off \on \off \on           & 00
-    10 & rck  & \off \on \on \off  \off \on \on \off           & 01
-    11 & sck  & \off \on \on \off  \off \on \off \on           & 01
-    12 & rck  & \off \on \on \off  \off \on \on \off           & 02
+    1  & sple & \on  \on  \on  \on   \off \off \off \on            & xy \\
+    2  & cs0  & \on  \on  \on  \on   \off \off \off \on            & xy \\
+    3  & rce1 & \on  \on  \on  \off  \off \off \off \on            & xy \\
+    4  & rce2 & \on  \on  \off \off  \off \off \off \on            & xy \\
+    5  & rck  & \on  \on  \off \off  \off \off \on  \off           & 00 \\
+    6  & sce2 & \on  \on  \on  \off  \off \off \on  \off           & 00 \\
+    7  & cs1  & \on  \on  \on  \off  \off \on  \on  \off           & 00 \\
+    8  & rpoe & \off \on  \on  \off  \off \on  \on  \off           & 00 \\
+    9  & sck  & \off \on  \on  \off  \off \on  \off \on            & 00 \\
+    10 & rck  & \off \on  \on  \off  \off \on  \on  \off           & 01 \\
+    11 & sck  & \off \on  \on  \off  \off \on  \off \on            & 01 \\
+    12 & rck  & \off \on  \on  \off  \off \on  \on  \off           & 02 \\
 
     \hline
     \end{tabular}
     \label{erprobung}
 \end{table}
 
-
+\newpage
 
 \section{Schlussfolgerungen}
-In diesem Experiment haben wir erfolgreich ein Teil des Datenpfades, insbesondere den Befehlsz\"ahler untersuchen k\"onnen. Hierbei konnten wir beobachten, wie ein Befehlsz\"ahler funktioniert und welche Signalfolgen f\"ur welche Funktionen ben\"otigt werden. Dabei war die Zeitbehaftete Analyse besonders interessant. Einerseits, weil die Testbench neu bearbeitet werden musste, \"uberhaupt eine korrekte Analyse durchf\"uhren zu k\"onnen. Andererseits, weil wir die Busse nicht konkret beobachten konnten, welches die Analyse etwas erschwert hat.
+In diesem Experiment haben wir erfolgreich ein Teil des Datenpfades, insbesondere den Befehlsz\"ahler untersuchen k\"onnen. Hierbei konnten wir beobachten, wie ein Befehlsz\"ahler funktioniert und welche Signalfolgen f\"ur welche Funktionen ben\"otigt werden. Dabei war die zeitbehaftete Analyse besonders interessant. Einerseits, weil die Testbench neu bearbeitet werden musste, um \"uberhaupt eine korrekte Analyse durchf\"uhren zu k\"onnen. Andererseits, weil wir die Busse nicht konkret beobachten konnten, welches die Analyse etwas erschwert hat.
 
 
 \end{document}
