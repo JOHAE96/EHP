@@ -22,16 +22,16 @@ int main(void) {
     /* Aufgabe 2: fade in videoA over 2s */
     int frame;
     float fade_duration = 2 * 25.0; /* 2s */
-    
-    /* 
+
+    /*
         HINWEISE
-        
-        Mit 'inputframeA', 'inputframeB' und 'outputframe' ist bereits Speicher allokiert, 
-        der jeweils die Größe eines Bildes besitzt.
+
+        Mit 'inputframeA', 'inputframeB' und 'outputframe' ist bereits Speicher allokiert,
+        der jeweils die Groeße eines Bildes besitzt.
         Verwenden Sie diese Speicherbereiche als Zwischenspeicher um
-        Bilder zu laden bzw. die Ergebnisse darin zwischenzuspeichern.        
+        Bilder zu laden bzw. die Ergebnisse darin zwischenzuspeichern.
     */
-    
+
     for (frame = 0; frame < (int) fade_duration; frame++)
     {
         __m128 skalar;
@@ -49,7 +49,7 @@ int main(void) {
             /* 3. Speichere 'ergebnis' is outputframe*/
             _mm_store_ps (&outputframe[i], ergebnis);
         }
-        
+
         save_frame (outputframe);
     }
 
@@ -58,12 +58,12 @@ int main(void) {
 #if 1
     /* Aufgabe 3: display videoA for 2s */
     fade_duration = 2.0 * 25.0;
-    
+
     for (frame = 0; frame < (int) fade_duration; frame++) {
         load_next_frame_from_videoA (inputframeA);
-        save_frame(inputframeA); 
+        save_frame(inputframeA);
     }
-    
+
 #endif
 
 #if 1
@@ -91,40 +91,40 @@ int main(void) {
             /* 4. Lade 4 floats in 'vektorB' */
             vektorB = _mm_load_ps (&inputframeB[i]);
 
-            /* 5. Berechne 'ergebnis'. Nutze dazu evtl. nötige Zwischenergebnisse*/
+            /* 5. Berechne 'ergebnis'. Nutze dazu evtl. noetige Zwischenergebnisse*/
             __m128 betaB, alphaA;
             alphaA = _mm_mul_ps (alpha, vektorA);
             betaB = _mm_mul_ps (beta, vektorB);
             ergebnis = _mm_add_ps (betaB, alphaA);
-            
+
             /* 6. Speichere 'ergebnis' is outputframe*/
             _mm_store_ps (&outputframe[i], ergebnis);
-            
+
         }
-        
+
         save_frame (outputframe);
     }
 #endif
 
 
-#if 1 
+#if 1
     /* Aufgabe 5: display videoB for 2s */
     fade_duration = 2.0 * 25.0;
-    
+
     for (frame = 0; frame < (int) fade_duration; frame++) {
         load_next_frame_from_videoB (inputframeB);
-        save_frame(inputframeB); 
+        save_frame(inputframeB);
     }
 
 #endif
 
-#if 1 
+#if 1
     /* Aufgabe 6: fade out videoB into green over 2s */
     fade_duration = 2.0 * 25.0;
 
     __m128 green;
     green = _mm_set_ps (0.0f, 0.0f, 1.0f, 0.0f);
-    
+
     for (frame = 0; frame < (int) fade_duration; frame++)
     {
         __m128 alpha, beta;
@@ -142,26 +142,26 @@ int main(void) {
             /* 3. Lade 4 floats in 'vektorB' */
             vektorB = _mm_load_ps (&inputframeB[i]);
 
-            /* 5. Berechne 'ergebnis'. Nutze dazu evtl. nötige Zwischenergebnisse*/
+            /* 5. Berechne 'ergebnis'. Nutze dazu evtl. noetige Zwischenergebnisse*/
             __m128 betagreen, alphaB;
             alphaB = _mm_mul_ps (alpha, vektorB);
             betagreen = _mm_mul_ps (beta, green);
             ergebnis = _mm_add_ps (betagreen, alphaB);
-            
+
             /* 6. Speichere 'ergebnis' is outputframe*/
             _mm_store_ps (&outputframe[i], ergebnis);
         }
         save_frame(outputframe);
     }
-            
+
 #endif
 
-#if 1 
+#if 1
     /* Aufgabe 7: 1s gruen zum Schluß */
     save_for_seconds (outputframe, 1);
-    
+
 #endif
-            
+
 
 
 

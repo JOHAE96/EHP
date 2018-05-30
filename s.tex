@@ -1,6 +1,7 @@
 
 \documentclass[12pt,a4paper]{scrartcl}
 
+\usepackage{amsmath}
 \usepackage{fancyhdr}
 \usepackage{times}
 \usepackage[T1]{fontenc} 
@@ -88,10 +89,10 @@ Gesamtbewertung:
 \section{Vorbereitung}
 SIMD-Operationen werden heute \"uberall genutzt, wo viele Daten identisch und h\"aufig in Echtzeit verarbeitet werden m\"ussen.
 Das gilt insbesondere in der Bild- und Videoverarbeitung, in der Kommunikation und im Gamingbereich.
-Zur Vorbereitung auf das Praktikum haben wir uns mit dem Positivbeispiel AltiVec auseinandergesetzt und es mit der hier verwendeten SSE-Architektur verglichen.
+Zur Vorbereitung auf das Praktikum haben wir uns unter anderem mit AltiVec auseinandergesetzt, um es mit der weit verbreiteten und auch hier benutzten SSE-Architektur von Intel zu vergleichen.
 
 In diesem Praktikum sollte sich einmal genauer mit den M\"oglichkeiten von SIMD vertraut gemacht werden, die es im Prinzip auf einem beliebigen Rechner erlauben, Berechnungen auf eine relativ einfach zu nutzende Weise effizienter zu gestalten.
-Ziel war es, zu lernen die St\"arken von SIMD zu nutzen und die Möglichkeiten der compilerseitigen Optimierung kennenzulernen.
+Ziel war es zu lernen, die St\"arken von SIMD zu nutzen und die Möglichkeiten der compilerseitigen Optimierung kennenzulernen.
 
 \section{Vorgehensweise}
 Zum Erreichen dieses Ziels sollte der Bereich Videoverarbeitung als Beispiel dienen.
@@ -194,7 +195,11 @@ for (frame = 0; frame < (int) fade_duration; frame++)
 }
 \end{lstlisting}
 
-An dieser Stelle sei darauf hingewiesen, dass wir abweichend von der Vorgabe $outputframe = \alpha \cdot inputframeA + \beta \cdot inputframeB$ mit $\alpha = (1 - \beta)$ berechnen, um $\beta$ von $0\rightarrow1$ laufen lassen zu k\"onnen und nicht umgekehrt.
+An dieser Stelle sei darauf hingewiesen, dass wir abweichend von der Vorgabe 
+\begin{equation*}
+outputframe = \alpha \cdot inputframeA + \beta \cdot inputframeB
+\end{equation*}
+mit $\alpha = (1 - \beta)$ berechnen, um $\beta$ von $0\rightarrow1$ laufen lassen zu k\"onnen und nicht umgekehrt.
 W\"urde man die gegebene Formel mit $\beta$ von $0\rightarrow1$ nutzen, h\"atte man einen Sprung von Video \emph{A} nach Video \emph{B} mit anschlie\ss endem Fade-Over zur\"uck zu Video \emph{A}.
 
 Die \"au\ss ere Schleife ist analog zu der in Listing \ref{a3.3}.
@@ -254,17 +259,16 @@ Man nutzt also eine relative Skala anstelle der Werte von 0 bis 255, da float-We
 Mit diesem gr\"unen Pixel wird nun die Fade-Over-Berechnung f\"ur Video \emph{B} durchgef\"uhrt, so als ob \texttt{green} ein komplettes Bild w\"are.
 
 \subsection{Anzeige eines gr\"unen Bildes f\"ur eine Sekunde}
-Da in der Variable \texttt{outputframe} nach dem vorherigen Schritt ein komplett gr\"unes Bild gespeichert ist, wurde f\"ur diese Aufgabe lediglich die Funktion \texttt{save\_for\_seconds(outputframe,1)} aufgerufen.
+Da in der Variable \texttt{outputframe} nach dem vorherigen Schritt ein komplett gr\"unes Bild gespeichert ist, wurde f\"ur diese Aufgabe lediglich die Funktion \\ \texttt{save\_for\_seconds(outputframe,1)} aufgerufen.
 
 \subsection{Assembler-Output}
 Diese Aufgabe haben wir zun\"achst missverstanden und das gesamte Programm auf eine skalare Berechnung umgestellt.
 Beim Vergleich der Assembler-Output fiel uns dann auf, dass h\"aufig solche \"Anderungen zu finden waren:
 
-%EDIT: Fix it
 \begin{lstlisting}[caption=Ausschnitt aus diff -u simd\_scalar.c simd\_sse.c]
 - movss	(%rdx,%rax), %xmm0
 - mulss	%xmm1, %xmm0
-+ movaps	(%rdx,%rax), %xmm0
++ movaps (%rdx,%rax), %xmm0
 + mulps	%xmm1, %xmm0
 \end{lstlisting}
 
@@ -274,7 +278,7 @@ Ein \emph{s} bedeutet dabei, dass nur die unteren 32 Bit f\"ur Berechnungen genu
 Nachdem uns das Missverst\"andnis aufgefallen ist, haben wir -- wie angedacht -- die Funktionsaufrufe durch +, - und * ersetzt, woraufhin der Assembler-Output identisch zum originalen Code war.
 
 \section{Schlussfolgerungen}
-Dass der Output in Aufgabe 3.8 in beiden F\"allen komplett gleich war, ist darauf zur\"uckzuf\"hren, dass der Compiler durch die starke Typisierung in C erkennt, dass zwei Variablen vom Typ \texttt{\_\_m128} miteinander verrechnet werden und die entsprechende Intrinsicsfunktion benutzt.
+Dass der Output in Aufgabe 3.8 in beiden F\"allen komplett gleich war, ist darauf zur\"uckzuf\"uhren, dass der Compiler durch die starke Typisierung in C erkennt, dass zwei Variablen vom Typ \texttt{\_\_m128} miteinander verrechnet werden und die entsprechende Intrinsicsfunktion benutzt.
 Durch die Ergebnisse unseres anf\"anglichen Fehlers haben wir einen noch besseren Einblick in die Arbeitsweise des Compilers erhalten.
 Die Vermutung liegt nahe, dass selbst in diesem skalaren Fall die MMX-Hardware genutzt wird, wenn auch recht ineffizient.
 
