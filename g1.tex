@@ -99,9 +99,187 @@ Der Hostcode ist dabei zum gr\"o\ss ten Teil vorgegeben, der Devicecode muss im 
 
 \subsection{Bild kopieren}
 Diese Aufgabe diente als Einf\"uhrung, um mit dem Programmiermodell vertraut zu werden.
-Au\ss erdem war damit Code
+Au\ss erdem war damit Code gegeben, auf dem in den anderen Aufgaben aufgebaut werden konnte.
 Die Kompilierung und die Ausf\"uhrung liefen wie erwartet.
 
+\subsection{Helligkeit/Kontrast anpassen}
+Die Ver\"anderung von Kontrast und Helligkeit eines Bildpunktes ist formal eine lineare Abbildung.
+Der Kontrast l\"asst sich anpassen, indem der Farbwert eines Bildpunktes mit einem Faktor multipliziert wird.
+Die Helligkeit wird per Addition angepasst.
+Ver\"andert werden dabei nur die RGB-Werte, der Alphakanal bleibt unber\"uhrt.
+Nach der Berechnung muss beachtet werden, dass die Bildpunkte vom Typ \texttt{unsigned char} sind, was bedeutet, dass sie Werte zwischen 0 und 255 annehmen.
+Aus diesem Grund muss man kleinere oder gr\"o\ss ere Werte entsprechend anpassen.
+Insgesamt haben wir den folgenden Kernel verwendet:
+
+\begin{lstlisting}[caption=linearTransformKernel,label=a2.2]
+int adrIn=(i+j*width)*4;
+int adrOut=adrIn;
+unsigned char r,g,b,a;
+float r_new, g_new, b_new;
+        
+r = img_in[adrIn+0];
+g = img_in[adrIn+1];
+b = img_in[adrIn+2];
+a = img_in[adrIn+3];
+        
+r_new = alpha*r + beta;
+r_new = r_new < 0?     0 : r_new;
+r_new = r_new > 255? 255 : r_new;
+        
+g_new = alpha*g + beta;
+g_new = g_new < 0?     0 : g_new;
+g_new = g_new > 255? 255 : g_new;
+        
+b_new = alpha*b + beta;
+b_new = b_new < 0?     0 : b_new;
+b_new = b_new > 255? 255 : b_new;
+        
+img_out[adrOut+0] = (unsigned char)r_new;
+img_out[adrOut+1] = (unsigned char)g_new;
+img_out[adrOut+2] = (unsigned char)b_new;
+img_out[adrOut+3] = a;
+
+\end{lstlisting}
+
+In Listing \ref{a2.2} wurde lediglich der Ausschnitt innerhalb der if-Abfrage des Indexes aufgef\"uhrt, da der \"au\ss ere Teil ohnehin immer gleich ist.
+Die eigentliche Berechnung findet innerhalb der Zeilen 11 bis 21 statt.
+Zuerst wird die lineare Abbildung angewendet, dann werden die Werte auf das Intervall $[1,255]$ beschr\"ankt.
+Abschlie\ss end ist ein Cast nach \texttt{unsigned char} n\"otig.
+
+\subsection{Bild spiegeln}
+Nun sollte die linke Bildseite auf die rechte gespiegelt werden.
+In dieser Hinsicht unterscheidet sich diese Aufgabe kaum von der ersten, es muss lediglich die Inputadresse angepasst werden.
+Die Formeln daf\"ur waren bereits in der Versuchsvorbereitung gegeben, konkret handelt es sich um die Formeln (1) und (3).
+Kombiniert man beide, ergibt sich die Berechnung, die in Listung \ref{a2.3} verwendet wird:
+
+\begin{lstlisting}[caption=mirrorKernel,label=a2.3]
+int adrIn;
+int adrOut=(i+j*width)*4;
+unsigned char r,g,b,a;
+
+if (i < width/2) {
+    adrIn=adrOut;
+} else {
+    adrIn=(width-i+j*width)*4;
+}
+
+r = img_in[adrIn+0];
+g = img_in[adrIn+1];
+b = img_in[adrIn+2];
+a = img_in[adrIn+3];
+
+img_out[adrOut+0] = r;
+img_out[adrOut+1] = g;
+img_out[adrOut+2] = b;
+img_out[adrOut+3] = a;
+
+\end{lstlisting}
+
+Die betroffene Zeile 8 l\"asst die jeweilige Zeile im Bild (\texttt{j*width}) unver\"andert und w\"ahlt die Spalte von rechts nach links aus, wodurch der Spiegelungseffekt entsteht.
+Der Faktor 4 ist notwendig, da jeder Bildpunkt aus 4 Werten (RGBA) besteht.
+
+\subsection{Graubild erstellen}
+In dieser Aufgabe sollte ein Graubild basierend auf dem Inputbild erstellt werden.
+Mathematisch wird dabei jeder Kanal eines Bildpunkts im Ergebnisbild auf den Durchschnitt der Kanalwerte des Bildpunktes im Ausgangsbild gesetzt.
+Dabei bleibt der Alphakanal wieder einmal unber\"uhrt.
+Listing \ref{a2.4} zeigt den verwendeten Kernel, bei dem sich lediglich die Zeilen 11 bis 15 von dem Kopierkernel unterscheiden. 
+
+\begin{lstlisting}[caption=bwKernel,label=a2.4]
+int adrIn=(i+j*width)*4;
+int adrOut=adrIn;
+unsigned char r,g,b,a;
+unsigned char bw;
+
+r = img_in[adrIn+0];
+g = img_in[adrIn+1];
+b = img_in[adrIn+2];
+a = img_in[adrIn+3];
+
+bw = (r+g+b)/3;
+
+img_out[adrOut+0] = bw;
+img_out[adrOut+1] = bw;
+img_out[adrOut+2] = bw;
+img_out[adrOut+3] = a;
+\end{lstlisting}
+
+Insgesamt war diese Aufgabe als Vorbereitung auf die n\"achste zu sehen, welche ein Graubild als Ausgangsbild ben\"otigt.
+
+\subsection{Kantendetektion mit Sobel-Filter}
+Eine detaillierte Erl\"auterung der Funktionsweise des Sobel-Filters findet sich in Abschnitt 1.1.5 der Versuchsbeschreibung.
+Zusammengefasst werden zwei mit Sobel-Operatoren gewichtete Summen $g_x$ und $g_y$ von einem Bildpunkt und seinen 8 Nachbarn gebildet.
+In einem zweiten Schritt wird die 2-Norm des Vektors ($g_x g_y$) als Grauwert in das Ergebnisbild geschrieben, das hei\ss t derselbe Wert in jeden Farbkanal.
+Unsere Implementierung ist in Listing \ref{a2.5} zu sehen.
+
+\begin{lstlisting}[caption=sobelKernel,label=a2.5]
+int adrIn;
+int adrOut=(i+j*width)*4;
+int i_new, j_new, bw;
+unsigned char r,a;    // is enough since r=g=b in a grayscale picture
+
+float gX = 0.0f, gY = 0.0f;
+
+for (int k = -1; k <= 1; k++) {
+    for (int l = -1; l <= 1; l++) {
+        i_new = i+k;
+        j_new = j+l;
+
+        if (i_new < 0 || i_new > width || j_new < 0 || j_new > height) {
+            r = 0;
+        } else {
+            adrIn=(i_new+j_new*width)*4;
+            r = img_in[adrIn];
+        }
+
+        gX += SX[1+k][1+l] * r;
+        gY += SY[1+k][1+l] * r;
+    }
+}
+
+adrIn = adrOut;
+a = img_in[adrIn+3];
+
+bw = sqrtf (gX*gX + gY*gY);
+
+img_out[adrOut+0] = bw;
+img_out[adrOut+1] = bw;
+img_out[adrOut+2] = bw;
+img_out[adrOut+3] = a;
+\end{lstlisting}
+
+Die Summen $g_x$ und $g_y$ werden durch die for-Schleifen in den Zeilen 8 bis 23 realisiert.
+Die Variablen \texttt{i\_new} und \texttt{j\_new} sind dabei die Koordinaten des Nachbarn, der gerade getrachtet wird.
+Falls sie au\ss erhalb des Bildes liegen sollten, wird ein schwarzer Bildpunkt als Berechnungsgrundlage gew\"alht (Zeilen 13 und 14).
+Anderenfalls muss die Adresse im Bildarray berechnet und der jeweilige Farbwert geladen werden.
+Es reicht an dieser Stelle vollkommen aus, nur einen Kanal zu laden, da das Ausgangsbild ein Graubild ist, welches die selben Farbwerte in allen Kan\"alen hat.
+Wir haben zur leichteren Adressierung den Rotkanal gew\"ahlt.
+In den Zeilen 20 und 21 wird dann die gewichtete Summation und in Zeile 28 wird anschlie\ss end die Normberechnung vorgenommen.
+Bevor der Output geschrieben werden kann, muss der Wert des Alphakanals geladen werden, was in Zeile 26 geschieht.
+Das Ergebnis des Sobel-Filters ist ein Graubild, weshalb wieder jeder Kanal denselben Wert erh\"alt.
+
+Im zweiten Teil dieser Aufgabe musste noch der Host-Code geschrieben werden.
+Dieser besitzt gro\ss e \"Ahnlichkeiten zu den \"ubrigen Host-Codes, jedoch gibt es den Unterschied, dass der Graubild- und der Sobel-Kernel nacheinander auf der GPU berechnet werden sollen, ohne dass das Zwischenergebnis auf die CPU kopiert werden soll.
+Dazu musste ein Zwischenspeicher auf der GPU reserviert werden, der als Ausgabe f\"ur den bwKernel und als Input f\"ur den sobelKernel verwendet wird.
+Nach der Verwendung muss auch dieser Speicher freigegeben werden.
+Ein Teil der Aufgabe war, dass der Code aus \texttt{bwCuda()} kopiert werden soll.
+In Listing \ref{a2.5host} sind deshalb die Zeilen mit einem Kommentar gekennzeichnet, die wir ver\"andert bzw. hinzugef\"ugt haben.
+
+\begin{lstlisting}[caption=sobelCuda,label=a2.5host,breaklines=true]
+unsigned char *img_in_dev, *img_out_dev, *img_bw_dev; //Zwischenspeicher *img_bw_dev deklariert
+int size=width*height*4;
+cudaMalloc((void**)&img_in_dev,size*sizeof(unsigned char));
+cudaMalloc((void**)&img_out_dev,size*sizeof(unsigned char));
+cudaMalloc((void**)&img_bw_dev,size*sizeof(unsigned char)); // Zwischenspeicher reserviert
+dim3 threads(16,16);
+dim3 grid(width/threads.x+1,height/threads.y+1);
+cudaMemcpy(img_in_dev,img_in,size*sizeof(unsigned char),cudaMemcpyHostToDevice); // Zwischenspeicher als Ausgabeziel
+bwKernel<<<grid,threads>>>(img_in_dev,img_bw_dev,width,height); // Zwischenspeicher als Eingabe
+sobelKernel<<<grid,threads>>>(img_bw_dev,img_out_dev,width,height);
+cudaMemcpy(img_out,img_out_dev,size*sizeof(unsigned char),cudaMemcpyDeviceToHost);
+cudaFree(img_in_dev);
+cudaFree(img_out_dev);
+cudaFree(img_bw_dev); // Freigeben des Zwischenspeicher
+\end{lstlisting}
 
 \section{Schlussfolgerungen}
 
