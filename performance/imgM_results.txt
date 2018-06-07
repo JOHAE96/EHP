@@ -1,0 +1,61 @@
+Reading PNG File img_in_M.png (3000x2000, COLOR_TYPE:2)
+============================================================
+===============
+Kernel Timings:
+===============
+
+Threadblock Configuration: (1,1) Threads
+-------------------------------------------
+copyKernel: 23.977076 ms
+mirrorKernel: 22.893370 ms
+linearTransformKernel: 25.971645 ms
+bwKernel: 24.093046 ms
+sobelKernel: 38.574261 ms
+
+Threadblock Configuration: (2,2) Threads
+-------------------------------------------
+copyKernel: 7.749177 ms
+mirrorKernel: 7.168865 ms
+linearTransformKernel: 7.792581 ms
+bwKernel: 7.490219 ms
+sobelKernel: 12.448223 ms
+
+Threadblock Configuration: (4,4) Threads
+-------------------------------------------
+copyKernel: 2.646129 ms
+mirrorKernel: 2.275528 ms
+linearTransformKernel: 2.426204 ms
+bwKernel: 2.361755 ms
+sobelKernel: 4.124171 ms
+
+Threadblock Configuration: (8,8) Threads
+-------------------------------------------
+copyKernel: 1.139007 ms
+mirrorKernel: 0.919002 ms
+linearTransformKernel: 0.858485 ms
+bwKernel: 0.864661 ms
+sobelKernel: 1.767823 ms
+
+Threadblock Configuration: (16,16) Threads
+-------------------------------------------
+copyKernel: 0.942760 ms
+mirrorKernel: 0.602976 ms
+linearTransformKernel: 0.569090 ms
+bwKernel: 0.583906 ms
+sobelKernel: 1.110434 ms
+
+Threadblock Configuration: (32,32) Threads
+-------------------------------------------
+copyKernel: 0.747831 ms
+mirrorKernel: 0.508625 ms
+linearTransformKernel: 0.530436 ms
+bwKernel: 0.504585 ms
+sobelKernel: 0.899187 ms
+
+===============
+Memory Timings:
+===============
+cudaMalloc: 0.779336 ms
+cudaMemcpy H->D: 4.597414 ms
+cudaMemcpy D->H: 4.506654 ms
+cudaFree: 14.321214 ms
