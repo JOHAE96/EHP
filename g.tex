@@ -34,9 +34,11 @@
 \end{center}
 
 \vspace{1em}
-Versuch: G1 - Parallelrechner - Grafikkarten - Implementierung
+Versuch: G - GPU Programmierung
 
-Versuchsdatum und -zeit: 30. Mai 2018, 14 - 17 Uhr
+Versuchsdatum und -zeit:
+
+G1: 30. Mai 2018, 14 - 17 Uhr / G2: 07: Juni 2018, 10 - 13 Uhr 
 
 Betreuer: Ralf Seidler
 
@@ -90,19 +92,30 @@ Gesamtbewertung:
 
 
 \section{Vorgehensweise}
-Dazu soll in diesem Versuch eine Grafikkarte so programmiert werden, dass ein Bild damit bearbeitet wird.
+Uns wurden drei Server mit NVIDIA-Grafikkarten zur Verf\"ugung gestellt, mit denen wir uns per \texttt{ssh} verbinden konnten.
+F\"ur den Praktikumsteil G1 soll eine Grafikkarte so programmiert werden, dass ein Bild damit bearbeitet wird.
+Dazu wurden uns neben Testbildern die Datei \texttt{cuda-kernels.cu} f\"ur die Programmierung der Kernels für das \textit{Device} und die \texttt{cuda-host.cu} f\"ur den Code, welches auf \textit{Host}-Seite ausgef\"uhrt werden soll, bereitgestellt.
 Konkret soll dieses in der Helligkeit und im Kontrast angepasst, gespiegelt und in ein Graubild \"uberf\"uhrt werden.
 Zudem soll eine Kantendetektion angewendet werden.
 Der Hostcode ist dabei zum gr\"o\ss ten Teil vorgegeben, der Devicecode muss im Laufe des Versuchs angepasst werden.
 
+F\"ur den Praktikumsteil G2 soll mit dem bereitgestellten Programm \texttt{cuda-nvvp} eine Performance-Analyse f\"ur die verschiedenen in G1 implementierten Kernels durchgef\"uhrt werden.
+Es sollen die Anzahl an FLOPSs, der Datendurchsatz der Speicheroperationen und die Daten\"ubertragungsrate zwischen dem \textit{Device} und dem \textit{Host} analysiert werden.
+Dazu wird ebenfalls die Speichereffizienz auf dem globalen Speicher des \textit{Device} beobachtet.
+
+Daraufhin sollten unsere Kernelcodes auf Performance optimiert werden, indem wir auf anderen Datentypen arbeiten.
+Konkret sollten wir anstatt \texttt{unsigned char} f\"ur die Farbwerte des Bildes den Datentyp \texttt{unsigned int} verwenden, um die Anzahl der Lade- und Speicheroperationen zu minimieren.
+Zum Schluss wird der neue Code erneut auf Performance analysiert und mit den alten Werten verglichen.
 \section{Erprobung}
 
-\subsection{Bild kopieren}
+\subsection{Aufgabenteil G1}
+
+\subsubsection{Bild kopieren}
 Diese Aufgabe diente als Einf\"uhrung, um mit dem Programmiermodell vertraut zu werden.
 Au\ss erdem war damit Code gegeben, auf dem in den anderen Aufgaben aufgebaut werden konnte.
 Die Kompilierung und die Ausf\"uhrung liefen wie erwartet.
 
-\subsection{Helligkeit/Kontrast anpassen}
+\subsubsection{Helligkeit/Kontrast anpassen}
 Die Ver\"anderung von Kontrast und Helligkeit eines Bildpunktes ist formal eine lineare Abbildung.
 Der Kontrast l\"asst sich anpassen, indem der Farbwert eines Bildpunktes mit einem Faktor multipliziert wird.
 Die Helligkeit wird per Addition angepasst.
@@ -146,7 +159,7 @@ Die eigentliche Berechnung findet innerhalb der Zeilen 11 bis 21 statt.
 Zuerst wird die lineare Abbildung angewendet, dann werden die Werte auf das Intervall $[1,255]$ beschr\"ankt.
 Abschlie\ss end ist ein Cast nach \texttt{unsigned char} n\"otig.
 
-\subsection{Bild spiegeln}
+\subsubsection{Bild spiegeln}
 Nun sollte die linke Bildseite auf die rechte gespiegelt werden.
 In dieser Hinsicht unterscheidet sich diese Aufgabe kaum von der ersten, es muss lediglich die Inputadresse angepasst werden.
 Die Formeln daf\"ur waren bereits in der Versuchsvorbereitung gegeben, konkret handelt es sich um die Formeln (1) und (3).
@@ -178,7 +191,7 @@ img_out[adrOut+3] = a;
 Die betroffene Zeile 8 l\"asst die jeweilige Zeile im Bild (\texttt{j*width}) unver\"andert und w\"ahlt die Spalte von rechts nach links aus, wodurch der Spiegelungseffekt entsteht.
 Der Faktor 4 ist notwendig, da jeder Bildpunkt aus 4 Werten (RGBA) besteht.
 
-\subsection{Graubild erstellen}
+\subsubsection{Graubild erstellen}
 In dieser Aufgabe sollte ein Graubild basierend auf dem Inputbild erstellt werden.
 Mathematisch wird dabei jeder Kanal eines Bildpunkts im Ergebnisbild auf den Durchschnitt der Kanalwerte des Bildpunktes im Ausgangsbild gesetzt.
 Dabei bleibt der Alphakanal wieder einmal unber\"uhrt.
@@ -205,7 +218,7 @@ img_out[adrOut+3] = a;
 
 Insgesamt war diese Aufgabe als Vorbereitung auf die n\"achste zu sehen, welche ein Graubild als Ausgangsbild ben\"otigt.
 
-\subsection{Kantendetektion mit Sobel-Filter}
+\subsubsection{Kantendetektion mit Sobel-Filter}
 Eine detaillierte Erl\"auterung der Funktionsweise des Sobel-Filters findet sich in Abschnitt 1.1.5 der Versuchsbeschreibung.
 Zusammengefasst werden zwei mit Sobel-Operatoren gewichtete Summen $g_x$ und $g_y$ von einem Bildpunkt und seinen 8 Nachbarn gebildet.
 In einem zweiten Schritt wird die 2-Norm des Vektors ($g_x g_y$) als Grauwert in das Ergebnisbild geschrieben, das hei\ss t derselbe Wert in jeden Farbkanal.
@@ -280,6 +293,10 @@ cudaFree(img_in_dev);
 cudaFree(img_out_dev);
 cudaFree(img_bw_dev); // Freigeben des Zwischenspeicher
 \end{lstlisting}
+
+\subsection{Aufgabenteil G2}
+
+\subsubsection{Performance-Analyse}
 
 \section{Schlussfolgerungen}
 
