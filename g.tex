@@ -232,7 +232,7 @@ Zusammengefasst werden zwei mit Sobel-Operatoren gewichtete Summen $g_x$ und $g_
 In einem zweiten Schritt wird die 2-Norm des Vektors ($g_x g_y$) als Grauwert in das Ergebnisbild geschrieben, das hei\ss t derselbe Wert in jeden Farbkanal.
 Unsere Implementierung ist in Listing \ref{a2.5} zu sehen.
 
-\begin{lstlisting}[caption=sobelKernel,label=a2.5]
+\begin{lstlisting}[caption=sobelKernel,label=a2.5,breaklines=true]
 int adrIn;
 int adrOut=(i+j*width)*4;
 int i_new, j_new, bw;
@@ -303,11 +303,96 @@ cudaFree(img_bw_dev); // Freigeben des Zwischenspeicher
 \end{lstlisting}
 
 \subsection{Aufgabenteil G2}
+Dieser Aufgabenteil befasste sich mit der Analyse der zuvor geschriebenen Programme.
+Anschlie\ss end wurden die berechneten Werte genutzt, um die Effizienz zu erh\"ohen.
 
 \subsubsection{Performance-Analyse}
+Mit Hilfe des Programms \texttt{cuda-nvvp} wurden die Zeiten gemessen, die die Kernel auf verschiedenen Bildgr\"o\ss en gebraucht haben.
+Zus\"atzlich wurden die Zeiten f\"ur die Organisation angezeigt, also f\"ur das Reservieren und Freigeben von Speicher und f\"ur das \"Ubertragen der Daten.
+Die Durchschnittszeiten sind dabei auf Abbildung 1 zu sehen.
+Hier sieht man deutlich, dass k\"urzere Zeiten erreicht werden, wenn die Threadkonfiguration gr\"o\ss ere Bl\"ocke vorsieht.
+Das gilt f\"ur alle Kernel.
+Der Speedup-Faktor liegt dabei zwischen der kleinsten und der gr\"o\ss ten Konfiguration bei ungef\"ahr 50 und ist relativ unabh\"angig von der Bildgr\"o\ss e.
+
+Auf Abbildung 2 kann man die Verbesserung der einzelnen Kernel auf dem gleichen Bild betrachten.
+Die anderen Bildgr\"o\ss en zeigen ganz \"ahnliche Verl\"aufe.
+Auch hier sieht man, dass es f\"ur jeden einzelnen Kernel vorteilhaft ist, mit einer gro\ss en Konfiguration angewendet zu werden.
+
+F\"ur das \"Ubertragen der Daten wurden Zeiten von 1.363ms f\"ur das kleine Bild und 19.5ms f\"ur das gr\"o\ss te Bild gemessen.
+Zusammen mit den Bildgr\"o\ss en von 6000000 bis 96000000 Byte ergeben sich Speicherbandbreiten zwischen 4.098 und 4.58 GiB/s.
+Diese sind f\"ur die gleiche Bildgr\"o\ss e auch sehr \"ahnlich, wenn man Host->Device und Device->Host vergleicht.
+
+In der besten Konfiguration, also das gr\"o\ss te Eingabebild und die gr\"o\ss te Threadkonfiguration, erreichen die Kernel die in Tabelle \ref{perf} dargestellten Werte.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    Kernel & Performance in GFLOPS/s & Speicherbandbreite in GiB/s \\
+    \hline
+    copyKernel & --                  & 31.463 \\
+    linearTransformKernel & 25.855   & 31.54 \\
+    mirrorKernel & --                & 39.278 \\
+    bwKernel & 12.717                & 31.584 \\
+    sobelKernel & 123.806            & 40.356 \\
+    \hline
+    \end{tabular}
+    \caption{\"Ubersicht der Werte der Kernel in der besten Konfiguration}
+    \label{perf}
+\end{table}
+
+F\"ur den copyKernel und den mirrorKernel haben wir keine FLOPS/s angegeben, da keine FP-Arithmetik verwendet wird.
+Beim linearTransformKernel treten 6 FLOPS auf, beim bwKernel 3 und beim sobelKernel 40.
+Die Speicheroperationen sind bei jedem Kernel 8 (4 zum Laden, 4 zum Speichern), au\ss er beim sobelKernel, wo die Anzahl der Speicheroperationen zwischen 8 und 14 liegt, je nachdem, ob der betrachtete Pixel in der Mitte, an der Kante oder sogar Ecke des Bildes liegt.
+In der Tabelle \ref{perf} haben wir mit 14 gerechnet, weil das auf den gr\"o\ss ten Teil der Pixel zutrifft.
+
+Um noch genauere Informationen zu erhalten, haben wir den Nvidia Visual Profiler genutzt.
+Auf Abbildung 3 sieht man, dass die Load und Store Efficiency mit 21.8 bzw. 25 Prozent sehr gering sind.
+Das hat den Grund, dass jeder Thread 4 Werte aus dem global Memory laden muss, etwas berechnet und 4 Werte danach wieder zur\"uckschreiben muss.
+Im folgenden Abschnitt betrachtet man die Bilder als Integer-Arrays, um pro Pixel nur noch einen Wert laden zu m\"ussen.
+
+\subsubsection{Performance-Steigerung}
+Um die Berechnungen gr\"o\ss tenteils beibehalten zu k\"onnen mussten wir Makros definieren, wie es in der Versuchsbeschreibung auf den Seiten 15 und 16 beschrieben ist.
+Zusammengefasst trennt man den geladenen Integerwert in Bytes auf und f\"ugt ihn nach der Berechnung wieder zusammen.
+Dabei werden die Shiftoperationen genutzt.
+Es musste zudem beachtet werden, dass die Adressen zweier aufeinanderfolgender Pixel nun nicht mehr um 4 auseinanderliegen, sondern nur noch um 1.
+Als Beispiel haben wir den Integer-sobelKernel im Anhang dieses Protokolls gezeigt.
+Auch der Hostcode musste angepasst werden, um die Bilder als Integer-Arrays zu behandelt.
+
+Die anschlie\ss end mit cuda-nvvp-int gemessenen Werte sind in Tabelle \ref{perf-int} aufgef\"uhrt.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    Kernel & Performance in GFLOPS/s & Speicherbandbreite in GiB/s \\
+    \hline
+    copyKernel & --                  & 31.86  \\
+    linearTransformKernel & 25.668   & 31.874 \\
+    mirrorKernel & --                & 44.981 \\
+    bwKernel & 12.869                & 31.961 \\
+    sobelKernel & 129.152            & 42.099 \\
+    \hline
+    \end{tabular}
+    \caption{\"Ubersicht der Werte der Integer-Kernel in der besten Konfiguration}
+    \label{perf-int}
+\end{table}
+
+Die Ergebnisse sind erwartungsgem\"a\ss\ besser ausgefallen als die mit der char-Verwendung.
+Vor allem der sobelKernel, der die meisten Ladeoperationen hat, profitiert davon.
+Das sieht man auch auf Abbildung 4, bei der sich die Store Efficiency auf ganze 99.8\% erh\"oht hat.
+Die Load Efficiency hat sich ebenfalls erh\"oht, wenn auch nicht so stark.
+Im sobelKernel sind viel mehr Ladeoperationen n\"otig, die zudem nur einen Farbkanal ben\"otigen, sodass der Effekt nicht so stark ausf\"allt.
+
 
 \section{Schlussfolgerungen}
+In diesem Versuch wurde gezeigt, dass GPUs m\"achtige Werkzeuge sind, die man aber korrekt handhaben muss, um das meiste Potenzial aus ihnen herauszuholen.
+Vor allem die geringe Speicherbandbreite zwischen Host und Device bzw. zwischen dem Global Memory und den Recheneinheiten begrenzen die Geschwindigkeit nach oben.
+Aus diesem Grund sollte man haupts\"achlich solche Teile auf die GPU auslagern, die viel rechnen und wenige Speicherzugriffe ben\"otigen.
+Zus\"atzlich kann man die Berechnungen beschleunigen, indem man die Konfiguration der Bl\"ocke und Threads den Daten anpasst.
 
+\section{Anhang}
+\lstinputlisting[firstline=119,lastline=160,caption=sobelKernel,breaklines=true]{cuda-kernels-int.cu}
 \end{document}
 
 
