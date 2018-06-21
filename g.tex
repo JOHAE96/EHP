@@ -90,9 +90,17 @@ Gesamtbewertung:
 
 \section{Vorbereitung}
 
+Um Berechnungen zu paralellisieren und dementsprechend auch enorm zu beschleunigen werden heutzutage Multicore-Prozessoren verwendet.
+Seit einigen Jahren gib es nun aber auch die M\"oglichkeit, Grafikkarten mit ihrer hohen Anzahl an Kernen f\"ur allgemeine Berechnungen zu verwenden.
+Diese Eigenschaft namens \textit{General Purpose computing on Graphics Processing Units}, oder in kurz auch GPGPU, wird im Versuch G praktisch angewandt.
+
+Mithilfe von bereitgestellten Nvidia-Grafikkarten, welche mit CUDA C programmiert werden k\"onnen, sollen typische Operationen der Bildbearbeitung implementiert werden.
+Au\ss erdem soll die Performance der Implementierung analysiert werden.
+Dazu sollen auch m\"ogliche Optimierungsm\"oglichkeiten der Codes gesucht, implementiert, analyisert und mit dem urspr\"unglichen Werten verglichen werden.
+
 
 \section{Vorgehensweise}
-Uns wurden drei Server mit NVIDIA-Grafikkarten zur Verf\"ugung gestellt, mit denen wir uns per \texttt{ssh} verbinden konnten.
+Uns wurden drei Server mit Nvidia-Grafikkarten zur Verf\"ugung gestellt, mit denen wir uns per \texttt{ssh} verbinden konnten.
 F\"ur den Praktikumsteil G1 soll eine Grafikkarte so programmiert werden, dass ein Bild damit bearbeitet wird.
 Dazu wurden uns neben Testbildern die Datei \texttt{cuda-kernels.cu} f\"ur die Programmierung der Kernels f\"ur das \textit{Device} und die \texttt{cuda-host.cu} f\"ur den Code, welches auf \textit{Host}-Seite ausgef\"uhrt werden soll, bereitgestellt.
 Konkret soll dieses in der Helligkeit und im Kontrast angepasst, gespiegelt und in ein Graubild \"uberf\"uhrt werden.
@@ -104,8 +112,8 @@ Es sollen die Anzahl an FLOPSs, der Datendurchsatz der Speicheroperationen und d
 Dazu wird ebenfalls die Speichereffizienz auf dem globalen Speicher des \textit{Device} beobachtet.
 
 Daraufhin sollten unsere Kernelcodes auf Performance optimiert werden, indem wir auf anderen Datentypen arbeiten.
-Konkret sollten wir anstatt \texttt{unsigned char} f\"ur die Farbwerte des Bildes den Datentyp \texttt{unsigned int} verwenden, um die Anzahl der Lade- und Speicheroperationen zu minimieren.
-Zum Schluss wird der neue Code erneut auf Performance analysiert und mit den alten Werten verglichen.
+Konkret sollten wir in den Kernels in \texttt{cuda-kernels.cu} aus dem Versuch G1 anstatt \texttt{unsigned char} f\"ur die Farbwerte des Bildes den Datentyp \texttt{unsigned int} verwenden, um die Anzahl der Lade- und Speicheroperationen zu minimieren.
+Zum Schluss wird der neue Code erneut mit dem Programm \texttt{cuda-nvvp} auf Performance analysiert und mit den alten Werten verglichen.
 \section{Erprobung}
 
 \subsection{Aufgabenteil G1}
