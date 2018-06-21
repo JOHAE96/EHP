@@ -1,0 +1,148 @@
+
+\documentclass[12pt,a4paper]{scrartcl}
+
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[right=3cm]{geometry}
+
+\parindent=0pt
+\parskip=1em plus 2pt minus 1pt
+
+\topskip-2cm
+\textheight25cm
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\thepage}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+  \LARGE
+  Praktische \"Ubungen - \\
+  Experimentelle Hardwareprojekte \\
+  \bigskip
+  \Large
+  Versuchsprotokoll
+\end{center}
+
+\vspace{1em}
+Versuch: D - Digitalelektronik
+
+Versuchsdatum und -zeit:14.06.2018, 10.00 Uhr bis 13.00 Uhr
+
+Betreuer: Wolfgang Koch
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
+
+Email: alexander.kuehnle@uni-jena.de
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Mark Umnus, B.Sc. Informatik, 167419
+
+Email: mark.umnus@uni-jena.de
+
+\vspace*{1cm}
+%% \mbox{}\\
+\hrule
+\vspace*{1cm}
+{\Large  Eigenst\"andigkeitserkl\"arung }
+
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren
+k\"onnen. \\
+
+Unterschriften: \\
+\hspace*{4cm} ........................................
+\hspace{2cm} ........................................  \\
+
+\hrule
+
+\vspace*{0.3cm}
+\textbf{Vom Betreuer auszuf\"ullen:}
+
+Vorbereitung/Kolloquium:
+
+Durchf\"uhrung:
+
+Protokoll:
+
+Gesamtbewertung:
+\clearpage
+
+
+% Hier geht das Protokoll los...
+
+\section{Vorbereitung}
+In diesem Versuch sollte das Verhalten von MOS-Feldeffekttransitoren untersucht werden.
+Daf\"ur wurden die Transitoren am Computer simuliert und getestet, um anschlie\ss end auf einem Steckbrett in Hardware realisiert zu werden.
+In der Vorbereitung für den Versuch haben wir uns noch einmal mit elektrotechnischen Grundlagen auseinandergesetzt.
+Danach haben wir Vor\"uberlegungen angestellt und unsere Versuchsparameter ausgerechnet.
+Diese waren am 14. f\"ur Gruppe 2: $ K = 5.9*10^{-3} \frac{A}{V^2} $ und $600 \Omega $.
+Anschlie\ss end haben wir die \"Ubertragungskennlinie f\"ur diese Schaltung berechnet:
+F\"ur $U_{GS} < U_{th}$ flie\ss t kein Strom $I_D$.
+Sobald $U_{GS}$ \"uber $U_{th}$ steigt, tritt eine Abschn\"urung ein.
+Der Grund daf\"ur ist...
+
+\section{Vorgehensweise}
+Das Verhalten der Hardware wurde mit Hilfe eines DA/AD-Wandlers gemessen.
+Die Simulation wurde mit Hilfe von PSpice durchgef\"uhrt.
+
+\section{Erprobung}
+\subsection{Ausgangskennlinie simulieren}
+Die Ergebnisse die Simulation der Ausgangskennlinien sind auf Abbildung 1 zu sehen.
+Es wurden jeweils die Abschn\"urpunkte gekennzeichnet, ab denen der Strom nicht mehr zunimmt.
+Diese lassen sich auch durch $U_{GS}-U_{th}$ berechnen.
+Wie man sieht, ist der maximal m\"ogliche Strom jeweils abh\"angig von der Steuerspannung $U_{GS}$.
+Das liegt daran, dass das elektrische Feld, das am Gate-Anschluss erzeugt wird, dann entsprechend st\"arker ist.
+
+Die Str\"ome haben im Abschn\"urbereich quadratische Abst\"ande, wie man sich leicht klarmachen kann, indem man die Abst\"ande der Abst\"ande berechnet, die dann konstant sind:
+$$diff(diff(38.232, 19.942, 7.552, 1.062)) = diff(18.29, 12.39, 6.49) = (5.9, 5.9)$$
+Wie man sieht, ist dieser konstante Faktor gerade das Tausendfache der zuvor berechneten Steilheit K.
+Da Transistorenhersteller diese Steilheit beeinflussen k\"onnen, haben sie auch in der Hand, um wie viel h\"oher der Abschn\"urpunkt bei h\"ohrer Spannung liegt.
+
+\subsection{\"Ubertragungskennlinie simulieren}
+In diesem Abschnitt wurden in PSpice sowohl die \"Ubertragungskennlinie $I_D=f(U_{GS})$ (Abbildung 2) als auch die $U_{DS}=f(U_{GS})$ (Abbildung 3) simuliert.
+Auf Abbildung 2 erkennt man gut, wie kein Strom flie\ss t, wenn $U_{GS} < 1.4=U_{th}$.
+Zudem ist zu sehen, wie die Steigung des Graphen stark abf\"allt, wenn $U_{GS} \geq 2.823$, was dem zuvor berechneten Abschn\"urpunkt entspricht.
+
+Auf Abbildung 3 wurde der Abschn\"urpunkt durch den Schnittpunkt mit der Widerstandsgeraden markiert.
+
+\subsection{\"Ubertragungskennlinie messen}
+In dieser Aufgabe wurde erstmals das Experimentierboard genutzt, um die vorher simulierten \"Ubertragungskennlinien zu messen.
+Mit rot wurde jeweils die theoretische Kurve gezeichnet und die gemessene mit blau.
+Man sieht, dass die Messwerte erstaunlich gut mit der theoretischen Kurve \"ubereinstimmt.
+
+\subsection{\"Ubertragungskennlinie CMOS-Inverter messen}
+Nun haben wir auf dem Experimentierboard einen CMOS-Inverter aufgebaut, um hier die \"Ubertragungskennlinie $U_a=f(U_{GS})$ zu messen.
+In der zugeh\"origen Abbildung 6 sollten dann die Logikpegel eingetragen werden, also ab wann die Spannung als High bzw. Low erkannt wird.
+Wir haben 1.6V und 3.2V gew\"ahlt, da die Spannungen dar\"uber (bzw. darunter f\"ur High) keine deutlichen \"Anderungen mehr zu beobachten sind.
+Spannungen dazwischen werden als verboten definiert.
+
+\subsection{Strom im CMOS-Inverter simulieren}
+In dieser Aufgabe haben wir den CMOS-Inverter auch in PSpice beschrieben und den Strom $I_D=f(U_{GS})$ simuliert.
+Das Ergebnis ist auf Abbildung 7 zu sehen.
+Man sieht, dass Strom nur flie\ss t, wenn $1.4V < U_{GS} < 1.9V$.
+Letzteres ist dabei 5V-3.1V, was die Threshold-Spannung des PMOSFET ist.
+Auff\"allig ist, dass der Peak nicht genau in der Mitte zwischen 1.4V und 1.9V liegt, sondern weiter auf der linken Seite.
+Der Grund daf\"ur ist, dass die Steilheit des NMOSFET gr\"o\ss er ist als die des PMOSFET.
+
+\section{Schlussfolgerungen}
+In diesem Versuch wurde gezeigt, dass...
+Wir haben gelernt, wie man die W\"armeverlust durch den Vorwiderstand mit Hilfe von CMOS vermeiden kann.
+Das ist die Grundlage f\"ur die moderne Digitalelektronik, da anderenfalls zu viel Abw\"arme entstehen w\"urde.
+Des Weiteren haben wir gesehen, dass es bei CMOS beim Umschalten kurzzeitig einen Strom gibt, der aber angesichts der Milliarden von Transistoren stets beachtet werden muss.
+Insofern hat uns dieser Versuch wichtige Einblicke erm\"oglicht und wir haben eine Menge Neues erfahren.
+
+\end{document}
