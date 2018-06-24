@@ -8,6 +8,7 @@
 \usepackage[latin1]{inputenc}
 \usepackage[ngerman]{babel}
 \usepackage[right=3cm]{geometry}
+\usepackage{amsmath}
 
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
@@ -88,12 +89,48 @@ Gesamtbewertung:
 In diesem Versuch sollte das Verhalten von MOS-Feldeffekttransitoren untersucht werden.
 Daf\"ur wurden die Transitoren am Computer simuliert und getestet, um anschlie\ss end auf einem Steckbrett in Hardware realisiert zu werden.
 In der Vorbereitung für den Versuch haben wir uns noch einmal mit elektrotechnischen Grundlagen auseinandergesetzt.
-Danach haben wir Vor\"uberlegungen angestellt und unsere Versuchsparameter ausgerechnet.
-Diese waren am 14. f\"ur Gruppe 2: $ K = 5.9*10^{-3} \frac{A}{V^2} $ und $600 \Omega $.
-Anschlie\ss end haben wir die \"Ubertragungskennlinie f\"ur diese Schaltung berechnet:
-F\"ur $U_{GS} < U_{th}$ flie\ss t kein Strom $I_D$.
-Sobald $U_{GS}$ \"uber $U_{th}$ steigt, tritt eine Abschn\"urung ein.
-Der Grund daf\"ur ist...
+Daneben haben wir Vor\"uberlegungen angestellt und unsere Versuchsparameter ausgerechnet, die von unserer Gruppe (Nummer 2) und vom Datum abhingen.
+Insgesamt sind f\"ur diesen Versuch folgende Werte relevant:
+\begin{align} \label{eq:geg}
+&U_V = 5V \nonumber \\
+&U_{th} = 1.4V \nonumber \\
+&K = 10^{-3}*(4.5 + Tag/10) \frac{A}{V^2} = 10^{-3}*(4.5 + 14/10) \frac{A}{V^2} = 5.9*10^{-3} \frac{A}{V^2} \nonumber \\
+&R = 400\Omega + Gruppe*100\Omega = 400\Omega + 200\Omega = 600 \Omega
+\end{align}
+Anschlie\ss end haben wir die \"Ubertragungskennlinie f\"ur diese Schaltung in mehreren Schritten berechnet.
+Wir haben folgende Formeln verwendet:
+\begin{equation} \label{eq:UDS}
+U_{DS} = U_V - I_D * R
+\end{equation}
+\begin{equation} \label{eq:Up}
+U_p = U_{GS} - U_{th}
+\end{equation}
+\begin{align} \label{eq:ID}
+&I_D = \left\{
+  \begin{array}{lr}
+    0  & U_{GS} < U_{th}\\
+    K((U_{GS} - U_{th})U_{DS} - \frac{1}{2}U_{GS}^2 & U_{DS} < U_p\\
+    \frac{1}{2}K(U_{GS} - U_{th})^2 & U_{GS} \geq U_{th} \wedge U_{DS} \geq U_p
+  \end{array}
+\right.
+\end{align}
+
+F\"ur die \"Ubertragungskennlinie bedeutet dies, dass $I_D = 0$ gilt, bis $U_{GS} = U_{th}$, da davor der Widerstand des Transistors gegen unendlich geht.
+Sobald $U_{GS}$ \"uber $U_{th}$ steigt, flie\ss t ein Strom und es tritt eine Abschn\"urung ein.
+Der Grund daf\"ur ist, dass durch die Versorgungsspannung ein Potenzial am Drain anliegt, das $U_{GS}$ entgegenwirkt und den n-Kanal abschn\"urt.
+Dieser Effekt nimmt mit steigendem Strom zu.
+Im Folgenden soll daher der Abschn\"urpunkt $U_{ab} = U_{GS}$ berechnet werden, so dass $U_{DS} = U_p$.
+\begin{align*}
+&U_V - I_D*R \overset{(\ref{eq:UDS})}{=} \boldsymbol{U_{DS}} \overset{!}{=} U_p \overset{(\ref{eq:Up})}{=} U_{GS} - U_{th} = \underbrace{U_{ab} - U_{th}}_{=:x}\\
+&\overset{(\ref{eq:ID})}{\Rightarrow} U_V - \frac{1}{2}Kx^2*R = x\\
+&\Leftrightarrow -\frac{1}{2}Kx^2*R -x +U_V = 0 \\
+&\Leftrightarrow x^2 + \frac{2}{KR}x -\frac{2U_V}{KR} = 0 \\
+&\underset{x \geq 0}{\Rightarrow} x \overset{p-q-Formel}{=} -\frac{1}{KR} + \sqrt{\frac{1}{(KR)^2} + \frac{2U_V}{KR}} \approx 1.42182 V \\
+&\underline{U_{ab} = x + U_{th} \approx 2.82182 V}
+\end{align*}
+
+In der Berechnung wurde der dritte Fall aus (\ref{eq:ID}) verwendet, da per Annahme $U_{DS} = U_p$ galt und $U_{GS}$ sinnvollerweise gr\"o\ss er als $U_{th}$ sein sollte.
+
 
 \section{Vorgehensweise}
 Das Verhalten der Hardware wurde mit Hilfe eines DA/AD-Wandlers gemessen.
