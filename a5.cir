@@ -1,0 +1,20 @@
+MOSFET-PRAKTIKUM A1
+* Optionen fuer Simulation
+.OPTIONS LIST NOPAGE NOMOD
+
+* Daten fuer Grafik ausgeben
+.PROBE
+
+* Gleichspannungsanalyse
+.DC LIN V_2 0V 5V 0.01V
+
+* Modellbeschreibung
+.MODEL MNV1 NMOS VTO=1.4 KP=5.9E-3
+.MODEL MPV2 PMOS VTO=-3.1 KP=2.6E-3
+
+* Netzlistenbeschreibung
+M_1 3 1 0 0 MNV1
+M_2 3 1 2 2 MPV2
+V_1 1 0 DC 3V
+V_2 2 0 DC 5V
+.END

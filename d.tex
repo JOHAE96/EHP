@@ -17,6 +17,8 @@
     }
 \lstset{language=PSpice,numbers=left}
 
+\renewcommand\thesubsection{A\arabic{subsection}}
+
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
 
@@ -230,30 +232,92 @@ H\"alt man $U_{DS}$ konstant und erh\"oht stattdessen $U_{GS}$, so steigt der fl
 Diesen Effekt werden wir in A2 detaillierter untersuchen.
 
 \subsection{\"Ubertragungskennlinie simulieren}
-In diesem Abschnitt wurden in PSpice sowohl die \"Ubertragungskennlinie $I_D=f(U_{GS})$ (Abbildung 2) als auch die $U_{DS}=f(U_{GS})$ (Abbildung 3) simuliert.
-Auf Abbildung 2 erkennt man gut, wie kein Strom flie\ss t, wenn $U_{GS} < 1.4=U_{th}$.
+In diesem Abschnitt wurden in PSpice sowohl die \"Ubertragungskennlinie $I_D=f(U_{GS})$ (Abbildung 3) als auch die $U_{DS}=f(U_{GS})$ (Abbildung 4) simuliert.
+Auf Abbildung 3 erkennt man gut, wie kein Strom flie\ss t, wenn $U_{GS} < 1.4=U_{th}$.
 Zudem ist zu sehen, wie die Steigung des Graphen stark abf\"allt, wenn $U_{GS} \geq 2.823$, was dem zuvor berechneten Abschn\"urpunkt entspricht.
+Insgesamt stimmt diese Kurve gut mit der in der Vorbereitung berechneten Kennlinie \"uberein.
+Auf Abbildung 3 wurde der Abschn\"urpunkt durch den Schnittpunkt mit der Widerstandsgeraden markiert, die durch $|U_{GS} - U_{th}|$ gegeben ist.
+Aus den Abbildungen kann man ablesen, dass f\"ur $U_{GS} = 5$V die Werte $I_D = 7.6896$mA und $U_{DS} = 0.38265$V gelten.
+Daraus berechnet sich der Restwiderstand wie folgt:
+\begin{align*}
+R_{Transistor} & = \frac{U_V}{I_D} -R\\
+& = \frac{5\text{V}}{0.0076896\text{A}} - 600\Omega \\
+& \underline{ \approx 50.2289\Omega}
+\end{align*}
 
-Auf Abbildung 3 wurde der Abschn\"urpunkt durch den Schnittpunkt mit der Widerstandsgeraden markiert.
+Wie die beiden Diagramme zusammenh\"angen, wurde in der vorherigen Aufgabe bereits kurz angerissen.
+Beide stellen den Zusammenhang der Werte $U_{GS}$, $U_{DS}$ und $I_D$ dar.
+Deshalb enthalten sie \"ahnliche Informationen.
+Die quadratischen Abst\"ande der \"Aste in Abbildung 2 entsprechen dem quadratischen Anstieg in Abbildung 3, was wiederum der Steilheit K entspricht.
 
 \subsection{\"Ubertragungskennlinie messen}
 In dieser Aufgabe wurde erstmals das Experimentierboard genutzt, um die vorher simulierten \"Ubertragungskennlinien zu messen.
-Mit rot wurde jeweils die theoretische Kurve gezeichnet und die gemessene mit blau.
-Man sieht, dass die Messwerte erstaunlich gut mit der theoretischen Kurve \"ubereinstimmt.
+Verwendet wurden dabei ein 10k$\Omega$-Widerstand und ein n-Schicht-MOSFET.
+Mit rot wurde in den Abbildungen 5 und 6 jeweils die theoretische Kurve gezeichnet und die gemessene mit blau.
+Man sieht, dass die Messwerte erstaunlich gut mit der theoretischen Kurve \"ubereinstimmen.
+
+\subsection*{Vertiefung: Arbeitsgerade}
+In dieser Vertiefungsaufgabe sollte die Arbeitsgerade mit einem Widerstand von 100$\Omega$ in Abbildung 2 gezeichnet werden.
+Wir haben mit einem Widerstand von 200$\Omega$ simuliert, um \"ubersichtlichere Ergebnisse zu erhalten.
+Die Gleichung der Arbeitsgerade l\"asst sich durch den Vorwiderstand und der an ihm abfallenden Spannung berechnen:
+
+\begin{align*}
+I_{AG} & = \frac{U_V - U_{DS}}{R} \\ 
+& = \frac{5\text{V} - U_{DS}}{200\Omega}
+\end{align*}
+
+Die Arbeitspunkte sind in Tabelle \ref{tab:arbeitspunkte} zusammen mit der Leistung an diesen aufgef\"uhrt.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l|l}
+    \hline
+    $U_{GS}$ in V & $U_{DS}$ in V     & $I_AG$ in mA  & P in mW \\
+    \hline
+    5             & 1.0871            & 19.604        & 21.3115 \\
+    4             & 1.6               & 16.992        & 27.1872 \\
+    3             & 3.4936            & 7.552         & 26.2837 \\
+    2             & 4.79              & 1.0620        & 5.08698 \\
+    \hline
+    \end{tabular}
+    \caption{Arbeitspunkte der Schaltung aus Vorwiderstand und n-MOSFET mit Verlustleistung}
+    \label{tab:arbeitspunkte}
+\end{table}
+
+Diese Vertiefungsaufgabe sollte zeigen, dass bei einem n-MOSFET mit Vorwiderstand fast permanent \"uber 20mW geleistet werden.
+Dadurch entsteht Abw\"arme, die vermieden werden kann und sollte.
+Eine L\"osung hei\ss t CMOS und wird im Folgenden untersucht.
+
+(Die Probe mussten wir aus Zeitgr\"unden auslassen.)
 
 \subsection{\"Ubertragungskennlinie CMOS-Inverter messen}
+\label{invertermessen}
+Die Idee hinter CMOS ist es, den Vorwiderstand durch einen komplement\"aren MOSFET zu ersetzen.
+Dadurch kann verhindert werden, dass zur Betriebszeit Strom flie\ss t.
+Die einzigen Momente mit Stromfluss und damit Verlustleistung sind dann die Umschaltmomente.
 Nun haben wir auf dem Experimentierboard einen CMOS-Inverter aufgebaut, um hier die \"Ubertragungskennlinie $U_a=f(U_{GS})$ zu messen.
-In der zugeh\"origen Abbildung 6 sollten dann die Logikpegel eingetragen werden, also ab wann die Spannung als High bzw. Low erkannt wird.
+In der zugeh\"origen Abbildung 7 sollten dann die Logikpegel eingetragen werden, also ab wann die Spannung als High bzw. Low erkannt wird.
 Wir haben 1.6V und 3.2V gew\"ahlt, da die Spannungen dar\"uber (bzw. darunter f\"ur High) keine deutlichen \"Anderungen mehr zu beobachten sind.
-Spannungen dazwischen werden als verboten definiert.
+Spannungen dazwischen gelten als undefiniert.
+Im Vergleich mit Abbildung 4 f\"allt der deutlich steilere Spannungsabfall von $U_{DS}$ auf, der durch den komplement\"aren Transistor bedingt ist.
+Dieser hat n\"amlich f\"ur Spannungen $U_{GS}$, die gr\"o\ss er als die gesch\"atzten 3.2V sind, einen Widerstand, der gegen unendlich geht.
 
 \subsection{Strom im CMOS-Inverter simulieren}
-In dieser Aufgabe haben wir den CMOS-Inverter auch in PSpice beschrieben und den Strom $I_D=f(U_{GS})$ simuliert.
-Das Ergebnis ist auf Abbildung 7 zu sehen.
+In dieser Aufgabe haben wir den CMOS-Inverter in PSpice beschrieben und den Strom $I_D=f(U_{GS})$ simuliert.
+Das Ergebnis ist auf Abbildung 8 zu sehen, der Quellcode im Anhang in Listing \ref{lst:inverter}.
 Man sieht, dass Strom nur flie\ss t, wenn $1.4V < U_{GS} < 1.9V$.
-Letzteres ist dabei 5V-3.1V, was die Threshold-Spannung des PMOSFET ist.
+Letzteres ist dabei 5V-3.1V, was die Threshold-Spannung des p-MOSFET ist.
+Zus\"atzlich kann man erkennen, dass selbst die maximale Stromst\"arke nur im $\mu$A-Bereich liegt.
 Auff\"allig ist, dass der Peak nicht genau in der Mitte zwischen 1.4V und 1.9V liegt, sondern weiter auf der linken Seite.
-Der Grund daf\"ur ist, dass die Steilheit des NMOSFET gr\"o\ss er ist als die des PMOSFET.
+Der Grund daf\"ur ist, dass die Steilheit des n-MOSFET gr\"o\ss er ist als die des p-MOSFET.
+
+\subsection{\emph{NAND-Gatter} oder NOR-Gatter aufbauen}
+In dieser Aufgabe haben wir ein NAND-Gatter auf dem Steckbrett realisiert.
+Ein NAND-Gatter mit zwei Eing\"angen gibt genau dann den logischen Wert FALSCH aus, wenn beide Eing\"ange WAHR sind.
+Unsere Steckverbindungen sind auf Abbildung xy+1 zu sehen.
+Die \texttt{AO}-Anschl\"usse entsprechen dabei den Inputs, der Output wird an \texttt{AI 0} gemessen.
+Wir haben zwei Messreihen erstellt, einmal mit unseren in \ref{invertermessen} bestimmten Logikpegeln und einmal mit 5V/0V als Abgleich.
+Unsere Ergebnisse sind in Tabelle \ref{tab:nand} dargestellt.
 
 \section{Schlussfolgerungen}
 In diesem Versuch wurde gezeigt, dass...
@@ -262,7 +326,10 @@ Das ist die Grundlage f\"ur die moderne Digitalelektronik, da anderenfalls zu vi
 Des Weiteren haben wir gesehen, dass es bei CMOS beim Umschalten kurzzeitig einen Strom gibt, der aber angesichts der Milliarden von Transistoren stets beachtet werden muss.
 Insofern hat uns dieser Versuch wichtige Einblicke erm\"oglicht und wir haben eine Menge Neues erfahren.
 
+=> Schwierigkeiten
+
 \section{Anhang}
 \lstinputlisting[caption=PSpice-Quelltext f\"ur A1, label=lst:a1]{a1.cir}
+\lstinputlisting[caption=PSpice-Quelltext f\"ur A5, label=lst:inverter]{a5.cir}
 
 \end{document}
