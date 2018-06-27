@@ -224,7 +224,9 @@ Die Linien f\"ur $U_{GS} = 0\text{V}, 1$V sind auf der Abbildung nicht zu sehen,
 F\"ur diese gilt n\"amlich $U_{GS} < U_{th}$, es flie\ss t also unabh\"angig von der Drain-Source-Spannung kein Strom.
 
 Die Str\"ome haben im Abschn\"urbereich quadratische Abst\"ande, wie man sich leicht klarmachen kann, indem man die Abst\"ande der Abst\"ande berechnet, die dann konstant sind:
-$$diff(diff(38.232, 19.942, 7.552, 1.062)) = diff(18.29, 12.39, 6.49) = (5.9, 5.9)$$
+\begin{align*}
+diff(diff(38.232, 19.942, 7.552, 1.062)) = diff(18.29, 12.39, 6.49) = (5.9, 5.9)
+\end{align*}
 Wie man sieht, ist dieser konstante Faktor gerade das Tausendfache der zuvor berechneten Steilheit K.
 Da Transistorenhersteller diese Steilheit beeinflussen k\"onnen, haben sie auch in der Hand, um wie viel h\"oher der Abschn\"urpunkt bei h\"oherer Spannung liegt.
 Diese Steilheit kann man auch so betrachten:
@@ -235,8 +237,9 @@ Diesen Effekt werden wir in A2 detaillierter untersuchen.
 In diesem Abschnitt wurden in PSpice sowohl die \"Ubertragungskennlinie $I_D=f(U_{GS})$ (Abbildung 3) als auch die $U_{DS}=f(U_{GS})$ (Abbildung 4) simuliert.
 Auf Abbildung 3 erkennt man gut, wie kein Strom flie\ss t, wenn $U_{GS} < 1.4=U_{th}$.
 Zudem ist zu sehen, wie die Steigung des Graphen stark abf\"allt, wenn $U_{GS} \geq 2.823$, was dem zuvor berechneten Abschn\"urpunkt entspricht.
-Insgesamt stimmt diese Kurve gut mit der in der Vorbereitung berechneten Kennlinie \"uberein.
-Auf Abbildung 3 wurde der Abschn\"urpunkt durch den Schnittpunkt mit der Widerstandsgeraden markiert, die durch $|U_{GS} - U_{th}|$ gegeben ist.
+Insgesamt stimmt diese Kurve intervallweise gut mit der in der Vorbereitung berechneten Kennlinie \"uberein.
+Gr\"o\ss ere Abweichungen gibt es lediglich im Bereich um den Abschn\"urpunkt herum
+Auf Abbildung 4 wurde der Abschn\"urpunkt durch den Schnittpunkt mit der Widerstandsgeraden markiert, die durch $|U_{GS} - U_{th}|$ gegeben ist.
 Aus den Abbildungen kann man ablesen, dass f\"ur $U_{GS} = 5$V die Werte $I_D = 7.6896$mA und $U_{DS} = 0.38265$V gelten.
 Daraus berechnet sich der Restwiderstand wie folgt:
 \begin{align*}
@@ -272,7 +275,7 @@ Die Arbeitspunkte sind in Tabelle \ref{tab:arbeitspunkte} zusammen mit der Leist
     \centering
     \begin{tabular}{l|l|l|l}
     \hline
-    $U_{GS}$ in V & $U_{DS}$ in V     & $I_AG$ in mA  & P in mW \\
+    $U_{GS}$ in V & $U_{DS}$ in V     & $I_{AG}$ in mA  & P in mW \\
     \hline
     5             & 1.0871            & 19.604        & 21.3115 \\
     4             & 1.6               & 16.992        & 27.1872 \\
@@ -296,37 +299,68 @@ Die Idee hinter CMOS ist es, den Vorwiderstand durch einen komplement\"aren MOSF
 Dadurch kann verhindert werden, dass zur Betriebszeit Strom flie\ss t.
 Die einzigen Momente mit Stromfluss und damit Verlustleistung sind dann die Umschaltmomente.
 Nun haben wir auf dem Experimentierboard einen CMOS-Inverter aufgebaut, um hier die \"Ubertragungskennlinie $U_a=f(U_{GS})$ zu messen.
-In der zugeh\"origen Abbildung 7 sollten dann die Logikpegel eingetragen werden, also ab wann die Spannung als High bzw. Low erkannt wird.
-Wir haben 1.6V und 3.2V gew\"ahlt, da die Spannungen dar\"uber (bzw. darunter f\"ur High) keine deutlichen \"Anderungen mehr zu beobachten sind.
+In der zugeh\"origen Abbildung 8 sollten dann die Logikpegel eingetragen werden, also ab wann die Spannung als High bzw. Low erkannt wird.
+Wir haben 1.6V und 3.2V gew\"ahlt, da die Spannungen dar\"uber (bzw. darunter f\"ur Low) keine deutlichen \"Anderungen mehr bewirken.
 Spannungen dazwischen gelten als undefiniert.
 Im Vergleich mit Abbildung 4 f\"allt der deutlich steilere Spannungsabfall von $U_{DS}$ auf, der durch den komplement\"aren Transistor bedingt ist.
 Dieser hat n\"amlich f\"ur Spannungen $U_{GS}$, die gr\"o\ss er als die gesch\"atzten 3.2V sind, einen Widerstand, der gegen unendlich geht.
 
 \subsection{Strom im CMOS-Inverter simulieren}
 In dieser Aufgabe haben wir den CMOS-Inverter in PSpice beschrieben und den Strom $I_D=f(U_{GS})$ simuliert.
-Das Ergebnis ist auf Abbildung 8 zu sehen, der Quellcode im Anhang in Listing \ref{lst:inverter}.
+Das Ergebnis ist auf Abbildung 9 zu sehen, der Quellcode im Anhang in Listing \ref{lst:inverter}.
 Man sieht, dass Strom nur flie\ss t, wenn $1.4V < U_{GS} < 1.9V$.
 Letzteres ist dabei 5V-3.1V, was die Threshold-Spannung des p-MOSFET ist.
 Zus\"atzlich kann man erkennen, dass selbst die maximale Stromst\"arke nur im $\mu$A-Bereich liegt.
 Auff\"allig ist, dass der Peak nicht genau in der Mitte zwischen 1.4V und 1.9V liegt, sondern weiter auf der linken Seite.
 Der Grund daf\"ur ist, dass die Steilheit des n-MOSFET gr\"o\ss er ist als die des p-MOSFET.
 
-\subsection{\emph{NAND-Gatter} oder NOR-Gatter aufbauen}
-In dieser Aufgabe haben wir ein NAND-Gatter auf dem Steckbrett realisiert.
+\subsection{NAND-Gatter oder NOR-Gatter aufbauen}
+In dieser Aufgabe wurde uns das NAND-Gatter zum Realisieren auf dem Steckbrett vorgegeben.
 Ein NAND-Gatter mit zwei Eing\"angen gibt genau dann den logischen Wert FALSCH aus, wenn beide Eing\"ange WAHR sind.
-Unsere Steckverbindungen sind auf Abbildung xy+1 zu sehen.
-Die \texttt{AO}-Anschl\"usse entsprechen dabei den Inputs, der Output wird an \texttt{AI 0} gemessen.
-Wir haben zwei Messreihen erstellt, einmal mit unseren in \ref{invertermessen} bestimmten Logikpegeln und einmal mit 5V/0V als Abgleich.
-Unsere Ergebnisse sind in Tabelle \ref{tab:nand} dargestellt.
+Unsere Steckverbindungen sind auf Abbildung 10 zu sehen.
+Die \texttt{AO}-Anschl\"usse entsprechen dabei den Inputs, der Output wird an \texttt{AI 0} mit dem Programm \emph{mess1} gemessen.
+Ein CMOS-NAND-Gatter besteht im Prinzip aus zwei komplement\"aren Stromkreisen.
+Dabei sind zwei p-MOS-Transistoren parallel geschalten und zwei n-MOS-Transistoren darunter in Reihe.
+Bei genauem Hinsehen kann man dies auf der Abbildung erkennen.
+Liegt eine niedrige Spannung an mindestens einem der Eing\"ange an, so sind die selbstleitenden p-MOSFETs T1 und T2 ge\"offnet und es kann ein Strom von $V_{DD}$ nach Y bzw. \texttt{AI 0} flie\ss en.
+Die Transistoren T3 und T4 sperren dabei.
+Nur wenn an beiden Eing\"angen eine hohe Spannung anliegt, sind T1 und T2 gesperrt, es kann also kein Strom von $V_{DD}$ nach Y flie\ss en.
+Zus\"atzlich sind T3 und T4 ge\"offnet, sodass Y nun auf Masse gezogen wird und dort keine Spannung gemessen werden kann.
+
+Wir haben zwei Messreihen erstellt, einmal mit unseren in \ref{invertermessen} bestimmten Logikpegeln und einmal mit 5V/0V als Abgleich, um die Funktionsf\"ahigkeit unseres Aufbaus zu validieren.
+Die Ergebnisse sind in Tabelle \ref{tab:nand} dargestellt.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    $U_{AO 0}$ in V & $U_{AO 1}$ in V   & $U_{AI 0}$ in V  \\
+    \hline
+    0               & 0                 & 5.02        \\
+    0               & 5                 & 5.02        \\
+    5               & 0                 & 5.01        \\
+    5               & 5                 & 0.01        \\
+    \hline
+    1.6             & 1.6               & 5.00        \\
+    1.6             & 3.2               & 4.99        \\
+    3.2             & 1.6               & 5.00        \\
+    3.2             & 3.2               & 0.05        \\
+    \hline
+    \end{tabular}
+    \caption{Messwerte mit den nominellen und den von uns bestimmten Pegeln}
+    \label{tab:nand}
+\end{table}
+
+Man kann einerseits erkennen, dass unsere Schaltung so funktioniert wie sie soll und andererseits, dass auch unsere Logikpegel ihre Funktion erf\"ullen.
 
 \section{Schlussfolgerungen}
-In diesem Versuch wurde gezeigt, dass...
-Wir haben gelernt, wie man die W\"armeverlust durch den Vorwiderstand mit Hilfe von CMOS vermeiden kann.
-Das ist die Grundlage f\"ur die moderne Digitalelektronik, da anderenfalls zu viel Abw\"arme entstehen w\"urde.
+Aus diesem Versuch konnten wir viel mitnehmen, sowohl fachliche als auch methodische Kenntnisse.
+Wir haben gelernt, wie man die W\"armeverlust durch den Vorwiderstand mit Hilfe von CMOS vermeiden kann, was die Grundlage f\"ur die moderne Digitalelektronik ist.
 Des Weiteren haben wir gesehen, dass es bei CMOS beim Umschalten kurzzeitig einen Strom gibt, der aber angesichts der Milliarden von Transistoren stets beachtet werden muss.
-Insofern hat uns dieser Versuch wichtige Einblicke erm\"oglicht und wir haben eine Menge Neues erfahren.
+Auf der Methodikseite sahen wir uns vielen Schwierigkeiten ausgesetzt, da unsere Elektrotechnikkenntnisse fast komplett in Vergessenheit geraten waren und neu aufgebaut werden mussten.
+In der Nachbereitung war viel Recherchearbeit notwendig, doch wir sind froh, uns die M\"uhe gemacht zu haben, denn nun sind wir auf weitere Herausforderungen gut vorbereitet.
 
-=> Schwierigkeiten
+\clearpage
 
 \section{Anhang}
 \lstinputlisting[caption=PSpice-Quelltext f\"ur A1, label=lst:a1]{a1.cir}
