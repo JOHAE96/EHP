@@ -17,13 +17,15 @@ ram   equ  X"0FF8" ; Offset 0x0FF8
 ; r3 ... -a_(n-1)
 ; r4 ... a_n
 ; r5 ... -lower (= -3)
-; r6 ... - (upper-lower) (= -(12-3) = -9)
+; r6 ... -upper (= -12)
 ; r7 ... i
 ; r8 ... tmp variable deciding when to exit the for loop
+; r30 ... const -4
+; r31 ... memory address
 
 init:
-    lw.i r31, disp(r0)  ; r31 <- M[0x0000_0FFC]
-    slt r1, r0, r31     ; r1 <- 1 since r0 = 0 < 0x2000_0000 = r31
+    lw.i r31, ram(r0)   ; r31 <- M[0x0000_0FF8]
+    slt r1, r0, r31     ; r1 <- 1 since r0 = 0 < 0x1000_0000 = r31
     sub r2, r0, r0      ; r2 <- 0
     sub r3, r0, r1      ; r3 <- -1
     sub r5, r0, r1      ; r5 <- -1
@@ -32,14 +34,17 @@ init:
     sub r6, r0, r5      ; r6 <- 3
     sub r6, r6, r5      ; r6 <- 6
     sub r6, r6, r5      ; r6 <- 9
-    sub r6, r0, r6      ; r6 <- -9
-    sub r7, r1, r0      ; r7 <- 1
+    sub r6, r6, r5      ; r6 <- 12
+    sub r6, r0, r6      ; r6 <- -12
+    sub r7, r5, r0      ; r7 <- -3
+    sub r30, r5, r1     ; r30 <- -4
 for:
-    sub r7, r7, r1      ; i--
     sub r4, r2, r3      ; a_n     <- a_(n-2) - (-a_(n-1))
     sub r2, r0, r3      ; a_(n-2) <- - (-a_(n-1))
     sub r3, r0, r4      ; a_(n-1) <- -a_n
-    sw.i ram(r7), r4    ; RAM[i] <- a_n
+    sw.i zero(r31), r4  ; RAM[i] <- a_n
+    sub r31, r31, r30   ; r31 -= -4
+    sub r7, r7, r1      ; i--
     slt r8, r6, r7      ; r8 <- -upper < -i
     sub r8, r1, r8      ; r8 <- not r8
     beqz r8, for        ; another loop if r8 == 0 <=> -upper < -i
