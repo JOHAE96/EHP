@@ -42,3 +42,4 @@ for:
     beqz r8, for
 stop:
     j stop
+end

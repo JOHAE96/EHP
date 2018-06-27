@@ -50,3 +50,4 @@ for:
     beqz r8, for        ; another loop if r8 == 0 <=> -upper < -i
 stop:
     j stop
+end
