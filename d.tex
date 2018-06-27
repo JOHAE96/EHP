@@ -1,0 +1,335 @@
+
+\documentclass[12pt,a4paper]{scrartcl}
+
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[right=3cm]{geometry}
+\usepackage{amsmath}
+\usepackage{listings}
+\lstdefinelanguage{PSpice}{
+    keywords={.OPTIONS, .PROBE, .DC, .MODEL, .END},
+    keywordstyle=\color{blue}\bfseries,
+    comment=[l]{*}
+    }
+\lstset{language=PSpice,numbers=left}
+
+\renewcommand\thesubsection{A\arabic{subsection}}
+
+\parindent=0pt
+\parskip=1em plus 2pt minus 1pt
+
+\topskip-2cm
+\textheight25cm
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\thepage}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+  \LARGE
+  Praktische \"Ubungen - \\
+  Experimentelle Hardwareprojekte \\
+  \bigskip
+  \Large
+  Versuchsprotokoll
+\end{center}
+
+\vspace{1em}
+Versuch: D - Digitalelektronik
+
+Versuchsdatum und -zeit:14.06.2018, 10.00 Uhr bis 13.00 Uhr
+
+Betreuer: Wolfgang Koch
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
+
+Email: alexander.kuehnle@uni-jena.de
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Mark Umnus, B.Sc. Informatik, 167419
+
+Email: mark.umnus@uni-jena.de
+
+\vspace*{1cm}
+%% \mbox{}\\
+\hrule
+\vspace*{1cm}
+{\Large  Eigenst\"andigkeitserkl\"arung }
+
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren
+k\"onnen. \\
+
+Unterschriften: \\
+\hspace*{4cm} ........................................
+\hspace{2cm} ........................................  \\
+
+\hrule
+
+\vspace*{0.3cm}
+\textbf{Vom Betreuer auszuf\"ullen:}
+
+Vorbereitung/Kolloquium:
+
+Durchf\"uhrung:
+
+Protokoll:
+
+Gesamtbewertung:
+\clearpage
+
+
+% Hier geht das Protokoll los...
+
+\section{Vorbereitung}
+In diesem Versuch soll das Verhalten von MOS-Feldeffekttransitoren untersucht werden.
+Daf\"ur werden die Transitoren am Computer simuliert und getestet, um anschlie\ss end auf einem Steckbrett in Hardware realisiert zu werden.
+In der Vorbereitung auf den Versuch haben wir uns noch einmal mit elektrotechnischen Grundlagen auseinandergesetzt.
+Daneben haben wir Vor\"uberlegungen angestellt und unsere Versuchsparameter ausgerechnet, die von unserer Gruppe (Nummer 2) und vom Datum abhingen.
+Insgesamt sind f\"ur diesen Versuch folgende Werte relevant:
+
+\begin{align} \label{eq:geg}
+&U_V = 5V \nonumber \\
+&U_{th} = 1.4V \nonumber \\
+&K = 10^{-3} \cdot (4.5 + Tag/10) \frac{A}{V^2} = 10^{-3} \cdot (4.5 + 14/10) \frac{A}{V^2} = 5.9 \cdot 10^{-3} \frac{A}{V^2} \nonumber \\
+&R = 400\Omega + Gruppe \cdot 100\Omega = 400\Omega + 200\Omega = 600 \Omega
+\end{align}
+
+Anschlie\ss end haben wir die \"Ubertragungskennlinie f\"ur diese Schaltung in mehreren Schritten berechnet.
+Wir haben folgende Formeln verwendet:
+
+\begin{equation} \label{eq:UDS}
+    U_{DS} = U_V - I_D \cdot R
+\end{equation}
+
+\begin{equation} \label{eq:Up}
+    U_p = U_{GS} - U_{th}
+\end{equation}
+
+\begin{align} \label{eq:ID}
+&I_D = \left\{
+  \begin{array}{lr}
+    0  & U_{GS} < U_{th}\\
+    K((U_{GS} - U_{th})U_{DS} - \frac{1}{2}U_{GS}^2) & U_{DS} < U_p\\
+    \frac{1}{2}K(U_{GS} - U_{th})^2 & U_{GS} \geq U_{th} \wedge U_{DS} \geq U_p
+  \end{array}
+\right.
+\end{align}
+
+\begin{align} \label{eq:pq}
+    & x^2 -px +q = 0 \nonumber \\
+    \Leftrightarrow & x_{1,2} = -\frac{p}{2} \pm \sqrt{\frac{p^2}{4} - q}
+\end{align}
+
+F\"ur die \"Ubertragungskennlinie bedeutet dies, dass $I_D = 0$ gilt, bis $U_{GS} = U_{th}$, da davor der Widerstand des Transistors gegen unendlich geht.
+Sobald $U_{GS}$ \"uber $U_{th}$ steigt, flie\ss t ein Strom und es tritt eine Abschn\"urung ein.
+Der Grund daf\"ur ist, dass durch die Versorgungsspannung ein Potenzial am Drain anliegt, das $U_{GS}$ entgegenwirkt und den n-Kanal abschn\"urt.
+Dieser Effekt nimmt mit steigendem Strom zu.
+Im Folgenden soll daher der Abschn\"urpunkt $U_{ab} = U_{GS}$ berechnet werden, so dass $U_{DS} = U_p$.
+\begin{align*}
+&U_V - I_D \cdot R \overset{(\ref{eq:UDS})}{=} \boldsymbol{U_{DS}} \overset{!}{=} U_p \overset{(\ref{eq:Up})}{=} U_{GS} - U_{th} = \underbrace{U_{ab} - U_{th}}_{=:x}\\
+&\overset{(\ref{eq:ID})}{\Rightarrow} U_V - \frac{1}{2}Kx^2 \cdot R = x\\
+&\Leftrightarrow -\frac{1}{2}Kx^2 \cdot R -x +U_V = 0 \\
+&\Leftrightarrow x^2 + \frac{2}{KR}x -\frac{2U_V}{KR} = 0 \\
+&\underset{x \geq 0}{\Rightarrow} x \overset{(\ref{eq:pq})}{=} -\frac{1}{KR} + \sqrt{\frac{1}{(KR)^2} + \frac{2U_V}{KR}} \approx 1.42182 V \\
+&\underline{U_{ab} = x + U_{th} \approx 2.82182 V}
+\end{align*}
+
+In der Berechnung wurde der dritte Fall aus (\ref{eq:ID}) verwendet, da per Annahme $U_{DS} = U_p$ galt und $U_{GS}$ sinnvollerweise gr\"o\ss er als $U_{th}$ sein sollte.
+
+Um die \"Ubertragungskennlinie tats\"achlich zu zeichnen, haben wir in Tabelle \ref{tab:wertevorb} sechs Werte von $I_D = f(U_{GS})$ und $U_a = U_{DS} = f(U_{GS})$ f\"ur $U_{th} \leq U_{GS} \leq U_{ab}$ berechnet.
+An dieser Stelle nutzt man wie eben auch Fall 3 aus (\ref{eq:ID}), da $U_{DS} \geq U_{GS} - U_{th}$ gilt.
+$U_{DS}$ berechnet man mit Formel (\ref{eq:UDS}).
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    $U_{GS}$ in V     & $I_D$ in mA  & $U_{DS}$ in V \\
+    \hline
+    1.5               & 0.0295       & 4.9823        \\
+    1.75              & 0.3614       & 4.7832        \\
+    2.0               & 1.062        & 4.3628        \\
+    2.25              & 2.131        & 3.7214        \\
+    2.5               & 3.5695       & 2.8583        \\
+    $U_{ab}$          & 5.9636       & 1.4218        \\
+    \hline
+    \end{tabular}
+    \caption{$I_D = f(U_{GS})$ und $U_{DS} = f(U_{GS})$ f\"ur $U_{GS} < U_{ab}$}
+    \label{tab:wertevorb}
+\end{table}
+
+Als Best\"atigung ist $U_{DS} = U_{GS} - U_{th}$ bei $U_{GS} = U_{ab}$.
+Wird $U_{GS} > U_{ab}$, dann ist $U_{DS} < U_{GS} - U_{th}$ und man kann Fall 2 aus Formel (\ref{eq:ID}) verwenden.
+Es gilt:
+
+\begin{align}
+U_{DS} & \overset{(\ref{eq:UDS})}{=} U_V - I_D \cdot R \overset{(\ref{eq:ID})}{=} U_V - KR((U_{GS} - U_{th})U_{DS} - \frac{1}{2}U_{DS}^2) \nonumber \\
+\Leftrightarrow 0 & = U_V - KR(U_{GS} - U_{th} - 1)U_{DS} - \frac{1}{2}U_{DS}^2 \nonumber \\
+\Leftrightarrow 0 & = U_{DS}^2 + 2(U_{GS} - U_{th} - \frac{1}{KR})U_{DS} - \frac{2U_V}{KR} \nonumber \\
+\underset{U_{DS} \geq 0}{\Rightarrow} U_{DS} & \overset{(\ref{eq:pq})}{=} (-U_{GS} + U_{th} + \frac{1}{KR}) + \sqrt{(U_{GS} - U_{th} - \frac{1}{KR})^2 + \frac{2U_V}{KR}}
+\end{align}
+
+Setzt man dieses Ergebnis nun in (\ref{eq:UDS}) ein und stellt es nach $I_D$ um, so kann man die Wertetabelle f\"ur $U_{GS} \geq U_{ab}$ vervollst\"andigen.
+Wir beschr\"anken uns hier zur sp\"ateren Kontrolle auf $U_{GS} = 5V$.
+Es ergibt sich $U_{DS} \approx 0.40145868$V $\Rightarrow I_D \approx 7.664$mA.
+
+Nun bleibt es, den Restwiderstand und die Verlustleistung des vollst\"andig ge\"offneten Transistors zu bestimmen.
+Da es sich bei diesem Aufbau um eine Reihenschaltung handelt, ist der Gesamtwiderstand die Summe der Einzelwiderst\"ande.
+Der Gesamtwiderstand der Schaltung l\"asst sich einfach mit $R = \frac{U}{I}$ bestimmen.
+Zusammen ergibt sich:
+
+\begin{align*}
+R_{Transistor} & = R_{ges} - R \\
+& = \frac{5\text{V}}{0.007664\text{A}} - 600\Omega\\
+& \underline{\approx 52.4\Omega}
+\end{align*}
+
+Zudem bel\"auft sich die Verlustleistung auf 
+\begin{align*}
+P_{Transistor} & = I_D \cdot U_{DS} \\
+& \approx 0.007664\text{A} \cdot 0.40145868\text{V} \\
+& \underline{\approx 3.07678\text{mW}}
+\end{align*}
+
+\section{Vorgehensweise}
+Das Verhalten der Hardware wurde mit Hilfe eines DA/AD-Wandlers gemessen.
+Die Simulation wurde mit Hilfe von PSpice durchgef\"uhrt.
+
+\section{Erprobung}
+\subsection{Ausgangskennlinie simulieren}
+In der ersten Aufgabe sollte die Ausgangskennlinie $I_D = f(U_{DS}$ simuliert werden.
+Dies sollte zun\"achst f\"ur $U_{GS} = 3$V und anschlie\ss end f\"ur $U_{GS} \in \{0\text{V}, ..., 5\text{V}\}$ geschehen.
+Abbildung 2, die die Ergebnisse zeigt, enth\"alt der Einfachheit halber gleich alle Ausgangskennlinien.
+Der zugeh\"orige PSpice-Quellcode befindet sich im Anhang in Listing \ref{lst:a1}.
+Es wurden jeweils die Abschn\"urpunkte gekennzeichnet, ab denen der Strom nicht mehr zunimmt.
+Diese lassen sich auch durch $U_{GS}-U_{th}$ berechnen.
+Wie man sieht, ist der maximal m\"ogliche Strom jeweils abh\"angig von der Steuerspannung $U_{GS}$.
+Das liegt daran, dass das elektrische Feld, das am Gate-Anschluss erzeugt wird, dann entsprechend st\"arker ist.
+
+Die Linien f\"ur $U_{GS} = 0\text{V}, 1$V sind auf der Abbildung nicht zu sehen, sie liegen auf der x-Achse.
+F\"ur diese gilt n\"amlich $U_{GS} < U_{th}$, es flie\ss t also unabh\"angig von der Drain-Source-Spannung kein Strom.
+
+Die Str\"ome haben im Abschn\"urbereich quadratische Abst\"ande, wie man sich leicht klarmachen kann, indem man die Abst\"ande der Abst\"ande berechnet, die dann konstant sind:
+$$diff(diff(38.232, 19.942, 7.552, 1.062)) = diff(18.29, 12.39, 6.49) = (5.9, 5.9)$$
+Wie man sieht, ist dieser konstante Faktor gerade das Tausendfache der zuvor berechneten Steilheit K.
+Da Transistorenhersteller diese Steilheit beeinflussen k\"onnen, haben sie auch in der Hand, um wie viel h\"oher der Abschn\"urpunkt bei h\"oherer Spannung liegt.
+Diese Steilheit kann man auch so betrachten:
+H\"alt man $U_{DS}$ konstant und erh\"oht stattdessen $U_{GS}$, so steigt der flie\ss ende Strom quadratisch.
+Diesen Effekt werden wir in A2 detaillierter untersuchen.
+
+\subsection{\"Ubertragungskennlinie simulieren}
+In diesem Abschnitt wurden in PSpice sowohl die \"Ubertragungskennlinie $I_D=f(U_{GS})$ (Abbildung 3) als auch die $U_{DS}=f(U_{GS})$ (Abbildung 4) simuliert.
+Auf Abbildung 3 erkennt man gut, wie kein Strom flie\ss t, wenn $U_{GS} < 1.4=U_{th}$.
+Zudem ist zu sehen, wie die Steigung des Graphen stark abf\"allt, wenn $U_{GS} \geq 2.823$, was dem zuvor berechneten Abschn\"urpunkt entspricht.
+Insgesamt stimmt diese Kurve gut mit der in der Vorbereitung berechneten Kennlinie \"uberein.
+Auf Abbildung 3 wurde der Abschn\"urpunkt durch den Schnittpunkt mit der Widerstandsgeraden markiert, die durch $|U_{GS} - U_{th}|$ gegeben ist.
+Aus den Abbildungen kann man ablesen, dass f\"ur $U_{GS} = 5$V die Werte $I_D = 7.6896$mA und $U_{DS} = 0.38265$V gelten.
+Daraus berechnet sich der Restwiderstand wie folgt:
+\begin{align*}
+R_{Transistor} & = \frac{U_V}{I_D} -R\\
+& = \frac{5\text{V}}{0.0076896\text{A}} - 600\Omega \\
+& \underline{ \approx 50.2289\Omega}
+\end{align*}
+
+Wie die beiden Diagramme zusammenh\"angen, wurde in der vorherigen Aufgabe bereits kurz angerissen.
+Beide stellen den Zusammenhang der Werte $U_{GS}$, $U_{DS}$ und $I_D$ dar.
+Deshalb enthalten sie \"ahnliche Informationen.
+Die quadratischen Abst\"ande der \"Aste in Abbildung 2 entsprechen dem quadratischen Anstieg in Abbildung 3, was wiederum der Steilheit K entspricht.
+
+\subsection{\"Ubertragungskennlinie messen}
+In dieser Aufgabe wurde erstmals das Experimentierboard genutzt, um die vorher simulierten \"Ubertragungskennlinien zu messen.
+Verwendet wurden dabei ein 10k$\Omega$-Widerstand und ein n-Schicht-MOSFET.
+Mit rot wurde in den Abbildungen 5 und 6 jeweils die theoretische Kurve gezeichnet und die gemessene mit blau.
+Man sieht, dass die Messwerte erstaunlich gut mit der theoretischen Kurve \"ubereinstimmen.
+
+\subsection*{Vertiefung: Arbeitsgerade}
+In dieser Vertiefungsaufgabe sollte die Arbeitsgerade mit einem Widerstand von 100$\Omega$ in Abbildung 2 gezeichnet werden.
+Wir haben mit einem Widerstand von 200$\Omega$ simuliert, um \"ubersichtlichere Ergebnisse zu erhalten.
+Die Gleichung der Arbeitsgerade l\"asst sich durch den Vorwiderstand und der an ihm abfallenden Spannung berechnen:
+
+\begin{align*}
+I_{AG} & = \frac{U_V - U_{DS}}{R} \\ 
+& = \frac{5\text{V} - U_{DS}}{200\Omega}
+\end{align*}
+
+Die Arbeitspunkte sind in Tabelle \ref{tab:arbeitspunkte} zusammen mit der Leistung an diesen aufgef\"uhrt.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l|l}
+    \hline
+    $U_{GS}$ in V & $U_{DS}$ in V     & $I_AG$ in mA  & P in mW \\
+    \hline
+    5             & 1.0871            & 19.604        & 21.3115 \\
+    4             & 1.6               & 16.992        & 27.1872 \\
+    3             & 3.4936            & 7.552         & 26.2837 \\
+    2             & 4.79              & 1.0620        & 5.08698 \\
+    \hline
+    \end{tabular}
+    \caption{Arbeitspunkte der Schaltung aus Vorwiderstand und n-MOSFET mit Verlustleistung}
+    \label{tab:arbeitspunkte}
+\end{table}
+
+Diese Vertiefungsaufgabe sollte zeigen, dass bei einem n-MOSFET mit Vorwiderstand fast permanent \"uber 20mW geleistet werden.
+Dadurch entsteht Abw\"arme, die vermieden werden kann und sollte.
+Eine L\"osung hei\ss t CMOS und wird im Folgenden untersucht.
+
+(Die Probe mussten wir aus Zeitgr\"unden auslassen.)
+
+\subsection{\"Ubertragungskennlinie CMOS-Inverter messen}
+\label{invertermessen}
+Die Idee hinter CMOS ist es, den Vorwiderstand durch einen komplement\"aren MOSFET zu ersetzen.
+Dadurch kann verhindert werden, dass zur Betriebszeit Strom flie\ss t.
+Die einzigen Momente mit Stromfluss und damit Verlustleistung sind dann die Umschaltmomente.
+Nun haben wir auf dem Experimentierboard einen CMOS-Inverter aufgebaut, um hier die \"Ubertragungskennlinie $U_a=f(U_{GS})$ zu messen.
+In der zugeh\"origen Abbildung 7 sollten dann die Logikpegel eingetragen werden, also ab wann die Spannung als High bzw. Low erkannt wird.
+Wir haben 1.6V und 3.2V gew\"ahlt, da die Spannungen dar\"uber (bzw. darunter f\"ur High) keine deutlichen \"Anderungen mehr zu beobachten sind.
+Spannungen dazwischen gelten als undefiniert.
+Im Vergleich mit Abbildung 4 f\"allt der deutlich steilere Spannungsabfall von $U_{DS}$ auf, der durch den komplement\"aren Transistor bedingt ist.
+Dieser hat n\"amlich f\"ur Spannungen $U_{GS}$, die gr\"o\ss er als die gesch\"atzten 3.2V sind, einen Widerstand, der gegen unendlich geht.
+
+\subsection{Strom im CMOS-Inverter simulieren}
+In dieser Aufgabe haben wir den CMOS-Inverter in PSpice beschrieben und den Strom $I_D=f(U_{GS})$ simuliert.
+Das Ergebnis ist auf Abbildung 8 zu sehen, der Quellcode im Anhang in Listing \ref{lst:inverter}.
+Man sieht, dass Strom nur flie\ss t, wenn $1.4V < U_{GS} < 1.9V$.
+Letzteres ist dabei 5V-3.1V, was die Threshold-Spannung des p-MOSFET ist.
+Zus\"atzlich kann man erkennen, dass selbst die maximale Stromst\"arke nur im $\mu$A-Bereich liegt.
+Auff\"allig ist, dass der Peak nicht genau in der Mitte zwischen 1.4V und 1.9V liegt, sondern weiter auf der linken Seite.
+Der Grund daf\"ur ist, dass die Steilheit des n-MOSFET gr\"o\ss er ist als die des p-MOSFET.
+
+\subsection{\emph{NAND-Gatter} oder NOR-Gatter aufbauen}
+In dieser Aufgabe haben wir ein NAND-Gatter auf dem Steckbrett realisiert.
+Ein NAND-Gatter mit zwei Eing\"angen gibt genau dann den logischen Wert FALSCH aus, wenn beide Eing\"ange WAHR sind.
+Unsere Steckverbindungen sind auf Abbildung xy+1 zu sehen.
+Die \texttt{AO}-Anschl\"usse entsprechen dabei den Inputs, der Output wird an \texttt{AI 0} gemessen.
+Wir haben zwei Messreihen erstellt, einmal mit unseren in \ref{invertermessen} bestimmten Logikpegeln und einmal mit 5V/0V als Abgleich.
+Unsere Ergebnisse sind in Tabelle \ref{tab:nand} dargestellt.
+
+\section{Schlussfolgerungen}
+In diesem Versuch wurde gezeigt, dass...
+Wir haben gelernt, wie man die W\"armeverlust durch den Vorwiderstand mit Hilfe von CMOS vermeiden kann.
+Das ist die Grundlage f\"ur die moderne Digitalelektronik, da anderenfalls zu viel Abw\"arme entstehen w\"urde.
+Des Weiteren haben wir gesehen, dass es bei CMOS beim Umschalten kurzzeitig einen Strom gibt, der aber angesichts der Milliarden von Transistoren stets beachtet werden muss.
+Insofern hat uns dieser Versuch wichtige Einblicke erm\"oglicht und wir haben eine Menge Neues erfahren.
+
+=> Schwierigkeiten
+
+\section{Anhang}
+\lstinputlisting[caption=PSpice-Quelltext f\"ur A1, label=lst:a1]{a1.cir}
+\lstinputlisting[caption=PSpice-Quelltext f\"ur A5, label=lst:inverter]{a5.cir}
+
+\end{document}
