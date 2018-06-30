@@ -9,7 +9,6 @@
 \usepackage[ngerman]{babel}
 \usepackage[right=3cm]{geometry}
 \usepackage{listings} % for code
-\lstset{language=C, numbers=left}
 
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
@@ -34,11 +33,11 @@
 \end{center}
 
 \vspace{1em}
-Versuch:  
+Versuch: A3 - Befehlssatzerweiterung und Test eines RISC-Prozessors
 
-Versuchsdatum und -zeit: 
+Versuchsdatum und -zeit: 21. Juni 2018, 10 Uhr - 13 Uhr
 
-Betreuer:
+Betreuer: Andreas Reinsch
 
 \vspace{1em}
 Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
@@ -87,6 +86,42 @@ Gesamtbewertung:
 % Hier geht das Protokoll los...
 
 \section{Vorbereitung}
+Die wichtigste Grundlage zur Vorbereitung auf diesen Versuch war die Beschreibung des DLXJ-Prozessors, mit deren Hilfe wir uns verschiedene Konzepte klargemacht haben.
+Zuerst haben wir die Hexadezimaldarstellung von drei Kommandos betrachtet und diese decodiert.
+Der erste Schritt dabei ist es, die Hex-Darstellung in eine Bin\"ardarstellung umzuwandeln, da die Argumente der Befehle nicht in Tetraden organisiert sind.
+Der erste Befehl sieht dann folgenderma\ss en aus:
+\begin{align*}
+\text{0x50010003} & \equiv \underbrace{010100}_{OP-Code}\underbrace{00000}_{Rs1}\underbrace{00001}_{Rd}\underbrace{0000000000000011}_{Immediate} \\
+\text{0x0021100C} & \equiv \underbrace{000000}_{OP-Code}\underbrace{00001}_{Rs1}\underbrace{00001}_{Rs2}\underbrace{00010}_{Rd}\underbrace{00000}_{unused}\underbrace{001100}_{rr\_func} \\
+\text{0x00411809} & \equiv \underbrace{000000}_{OP-Code}\underbrace{00010}_{Rs1}\underbrace{00001}_{Rs2}\underbrace{00011}_{Rd}\underbrace{00000}_{unused}\underbrace{001001}_{rr\_func}
+\end{align*}
+
+Die Bin\"arbefehle wurden hier direkt interpretiert.
+Dies geschah auf Grundlage des OP-Codes, der bei den letzten beiden Befehlen bestimmt, dass es sich um R-Typ-Befehle handelt, w\"ahrend der erste ein I-Typ-Befehl ist.
+Auf die genaue Unterscheidung wird sp\"ater noch einmal eingegangen.
+Zun\"achst werden die Befehle in Tabelle \ref{tab:vorbinstr} zur Veranschaulichung in Assemblercode zur\"uck\"ubersetzt und dann ausgewertet.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|l|l}
+    \hline
+    Befehl      & Assemblercode     & Registerinhalte nach Befehl           \\
+    \hline
+    0x50010003  & add.i r1, r0, 3   & R1 <- R0 + 3 = 0 + 3 = 3              \\
+    0x0021100C  & sll   r2, r1, r1  & R2 <- R1 << R1 = 3 << 3 = 24          \\
+    0x00411809  & or    r3, r2, r1  & R3 <- R2 $\vee$ R1 = 24 $\vee$ 3 = 27 \\
+    \hline
+    \end{tabular}
+    \caption{Wahrheitswertabelle der Eing\"ange mit ihrer Auswirkung auf die Ausg\"ange}
+    \label{tab:vorbinstr}
+\end{table}
+
+Um in den n\"achsten Aufgaben die neuen Befehle implementieren zu k\"onnen, soll hier kurz der Unterschied zwischen R- und I-Typ-Befehlen erkl\"art werden.
+Der deutlichste Unterschied liegt schon im Befehlscodeformat.
+W\"ahrend R-Typen zwei Quellregister und eine \texttt{rr\_func} angeben und einen Teil des Befehlscodes gar nicht nutzen, geben I-Typen ein Quellregister und eine Konstante an.
+Diese Unterscheidung ist jedoch f\"ur das Steuerwerk und auch f\"ur die ALU irrelevant.
+Lediglich der Decoder 3 entscheidet auf dieser Basis, welcher Wert auf den S2-Bus gelegt werden soll - ob Konstante oder Registerinhalt.
+F\"ur die zu implementierenden Befehle bedeutet dies, dass jeweils nur ein neuer Zustand angelegt werden muss.
 
 \section{Vorgehensweise}
 
