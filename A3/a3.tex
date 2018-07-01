@@ -116,17 +116,51 @@ Zun\"achst werden die Befehle in Tabelle \ref{tab:vorbinstr} zur Veranschaulichu
     \label{tab:vorbinstr}
 \end{table}
 
-Um in den n\"achsten Aufgaben die neuen Befehle implementieren zu k\"onnen, soll hier kurz der Unterschied zwischen R- und I-Typ-Befehlen erkl\"art werden.
-Der deutlichste Unterschied liegt schon im Befehlscodeformat.
-W\"ahrend R-Typen zwei Quellregister und eine \texttt{rr\_func} angeben und einen Teil des Befehlscodes gar nicht nutzen, geben I-Typen ein Quellregister und eine Konstante an.
+Um in den n\"achsten Aufgaben die neuen Befehle implementieren zu k\"onnen, sollen hier kurz die Unterschiede zwischen R- und I-Typ-Befehlen erkl\"art werden.
+Der erste Unterschied liegt im Befehlscodeformat.
+W\"ahrend R-Typen zwei Quellregister und eine \texttt{rr\_func} angeben sowie einen Teil des Befehlscodes gar nicht nutzen, geben I-Typen ein Quellregister und eine 16-Bit-Konstante an.
 Diese Unterscheidung ist jedoch f\"ur das Steuerwerk und auch f\"ur die ALU irrelevant.
-Lediglich der Decoder 3 entscheidet auf dieser Basis, welcher Wert auf den S2-Bus gelegt werden soll - ob Konstante oder Registerinhalt.
+Lediglich der Decoder 3 entscheidet auf dieser Basis, welcher Wert auf den S2-Bus gelegt werden soll - die Konstante oder ein Registerinhalt.
 F\"ur die zu implementierenden Befehle bedeutet dies, dass jeweils nur ein neuer Zustand angelegt werden muss.
 
-\section{Vorgehensweise}
+Wir haben also 5 neue Zust\"ande definiert: ADD, AND, OR, SLL und SRL.
+Sie alle k\"onnen durch die Bedingung $OPCODE=xy \vee OPCODE=00000 \wedge rr_func=xy$ erreicht werden, wobei xy durch die jeweilige Befehlskennung zu ersetzen ist.
+Ebenso f\"uhren alle neuen Zust\"ande nach der Abarbeitung des jeweiligen Befehls in den Zustand WRITE BACK.
+Als Berechnung haben wir f\"ur einen Befehl OP \texttt{C = A OP Y} eingetragen, wobei A der Inhalt des Registers A ist und Y der Inhalt des Registers B oder ein Immediate-Wert, je nachdem, welcher Typ des Befehls vorliegt.
+% eventuell Boxdiagramm wie mit UML einfuegen?
 
+
+ASSEMBLERPROGRAMM
+Das Testprogramm besteht lediglich aus einer Aneinanderreihung der neuen Befehle.
+Um den Code kleinzuhalten haben wir darauf verzichtet, die Ergebnisse auf dem Display auszugeben.
+F\"ur die bessere \"Ubersicht \"uber die Resultate haben wir jedem Ergebnis ein eigenes Register zugewiesen.
+So ist es im sp\"ateren Register Dump m\"oglich, das Programm auf Richtigkeit zu pr\"ufen.
+Der Quellcode ist in Listing \ref{lst:test} dargestellt.
+\lstinputlisting[language=assembly, label=lst:test, caption=Testprogramm]{test.asm}
+
+Auch nach der letzten Anweisung eines Programms wird der Befehlsz\"ahler des DLXJ-Prozessors weiter inkrementiert, es werden neue Speicherinhalte geladen und der Prozessor versucht, diese auszuf\"uhren.
+Im g\"unstigsten Fall haben die Speicherinhalte ein ung\"ultiges Format und der Prozessor wechselt in den Error-State.
+Es k\"onnten aber auch beliebige Befehle im Speicher stehen die ebenso beliebige Effekte h\"atten.
+Um dies zu verhindern haben wir unser Programm mit einer Endlosschleife abgeschlossen.
+Diese verhindert effektiv, dass der Befehlsz\"ahler hochz\"ahlt, da er immer auf das Label \texttt{end} zur\"uckgesetzt wird.
+
+\section{Vorgehensweise}
+In diesem Versuch wurden die zus\"atzlichen Befehle implementiert.
+Anschlie\ss end wurde die Abarbeitung unseres Assemblerprogramms durch den DLXJ-Prozessor simuliert und auf dem Experimentalsystem getestet.
 
 \section{Erprobung}
+Dank unserer ausf\"uhrlichen Vorbereitung konnten wir unsere Aufgaben im Praktikum z\"ugig erledigen.
+Zuerst haben wir die VHDL-Dateien des Decoders 1, der Zust\"ande und der \"Uberf\"uhrungsfunktion angepasst.
+Dazu haben wir unseren Code an die bereits markierten Stellen kopiert.
+Das \"Ubersetzen mit dem Programm NAME verlief fehlerlos.
+
+Im Anschluss haben wir unser vorbereitetes Assemblerprogramm in den /asm-Ordner kopiert und \"ubersetzen lassen.
+Mit dem Programm NAME konnten wir die Simulation des Assemblerprogramms starten.
+Wir haben beobachtet, wie sich die Steuerleitungen LEITUNG1 und LEITUNG2 im Zeitverlauf verhalten.
+Zudem haben wir die Zust\"ande des Steuerwerks protokolliert, die erwartungsgem\"a\ss\  dem Schema FETCH -> Befehl -> WRITE BACK folgten.
+Die Registerbelegungen im Befehlsverlauf haben wir gedruckt; sie sind im Anhang xy zu finden.
+Es traten keine \"Uberraschungen auf.
+
 
 \section{Schlussfolgerungen}
 
