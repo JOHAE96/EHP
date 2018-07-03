@@ -9,6 +9,7 @@
 \usepackage[ngerman]{babel}
 \usepackage[right=3cm]{geometry}
 \usepackage{listings} % for code
+\usepackage{tikz}
 
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
@@ -87,6 +88,8 @@ Gesamtbewertung:
 
 \section{Vorbereitung}
 Die wichtigste Grundlage zur Vorbereitung auf diesen Versuch war die Beschreibung des DLXJ-Prozessors, mit deren Hilfe wir uns verschiedene Konzepte klargemacht haben.
+
+\subsection*{Befehlsstruktur}
 Zuerst haben wir die Hexadezimaldarstellung von drei Kommandos betrachtet und diese decodiert.
 Der erste Schritt dabei ist es, die Hex-Darstellung in eine Bin\"ardarstellung umzuwandeln, da die Argumente der Befehle nicht in Tetraden organisiert sind.
 Der erste Befehl sieht dann folgenderma\ss en aus:
@@ -112,10 +115,11 @@ Zun\"achst werden die Befehle in Tabelle \ref{tab:vorbinstr} zur Veranschaulichu
     0x00411809  & or    r3, r2, r1  & R3 <- R2 $\vee$ R1 = 24 $\vee$ 3 = 27 \\
     \hline
     \end{tabular}
-    \caption{Wahrheitswertabelle der Eing\"ange mit ihrer Auswirkung auf die Ausg\"ange}
+    \caption{Deassemblierte Befehle mit Registerupdates}
     \label{tab:vorbinstr}
 \end{table}
 
+\subsection*{R- und I-Befehlstypen}
 Um in den n\"achsten Aufgaben die neuen Befehle implementieren zu k\"onnen, sollen hier kurz die Unterschiede zwischen R- und I-Typ-Befehlen erkl\"art werden.
 Der erste Unterschied liegt im Befehlscodeformat.
 W\"ahrend R-Typen zwei Quellregister und eine \texttt{rr\_func} angeben sowie einen Teil des Befehlscodes gar nicht nutzen, geben I-Typen ein Quellregister und eine 16-Bit-Konstante an.
@@ -123,20 +127,62 @@ Diese Unterscheidung ist jedoch f\"ur das Steuerwerk und auch f\"ur die ALU irre
 Lediglich der Decoder 3 entscheidet auf dieser Basis, welcher Wert auf den S2-Bus gelegt werden soll - die Konstante oder ein Registerinhalt.
 F\"ur die zu implementierenden Befehle bedeutet dies, dass jeweils nur ein neuer Zustand angelegt werden muss.
 
-Wir haben also 5 neue Zust\"ande definiert: ADD, AND, OR, SLL und SRL.
-Sie alle k\"onnen durch die Bedingung $OPCODE=xy \vee OPCODE=00000 \wedge rr_func=xy$ erreicht werden, wobei xy durch die jeweilige Befehlskennung zu ersetzen ist.
-Ebenso f\"uhren alle neuen Zust\"ande nach der Abarbeitung des jeweiligen Befehls in den Zustand WRITE BACK.
-Als Berechnung haben wir f\"ur einen Befehl OP \texttt{C = A OP Y} eingetragen, wobei A der Inhalt des Registers A ist und Y der Inhalt des Registers B oder ein Immediate-Wert, je nachdem, welcher Typ des Befehls vorliegt.
-% eventuell Boxdiagramm wie mit UML einfuegen?
+\subsection*{Erweiterung des Steuerwerks}
+Wir haben also 5 neue Zust\"ande definiert: \texttt{add}, \texttt{and\_1}, \texttt{or\_1}, \texttt{sll\_1} und \texttt{srl\_1}, zu sehen auf Abbildung \ref{fig:fsm}.
+Sie alle k\"onnen durch die Bedingung $(op\_rr\_func \wedge rr\_func\_***) \vee op\_***\_i$ vom Zustand \texttt{dec\_pcinc4\_ab} aus erreicht werden, wobei *** durch die jeweilige Befehlskennung zu ersetzen ist.
+Ebenso f\"uhren alle neuen Zust\"ande nach der Abarbeitung des jeweiligen Befehls in den Zustand \texttt{wr\_back}.
+Als Berechnung haben wir f\"ur einen Befehl \texttt{$C \leftarrow A \circ Y$} eingetragen, wobei A der Inhalt des Registers A ist und Y der Inhalt des Registers B oder ein Immediate-Wert, je nachdem, welcher Typ des Befehls vorliegt.
+$\circ$ bezeichnet die jeweilige Operation.
+Auf diese Weise haben wir auch den \texttt{sub}-Zustand angepasst.
 
+\begin{figure}
+    \begin{tikzpicture}[scale=3] 
+        \path  (3, 2)  node[draw] (DEC) {dec\_pcinc4\_ab} 
+               (1, 1.5)  node[draw,align=center] (ADD) {add \\ $C \leftarrow A + Y$}
+               (2, 1.5)  node[draw,align=center] (AND) {and\_1 \\ $C \leftarrow A \wedge Y$}
+               (3, 1.5)  node[draw,align=center] (OR)  {or\_1 \\ $C \leftarrow A \vee Y$}
+               (4, 1.5)  node[draw,align=center] (SRL) {srl\_1 \\ $C \leftarrow A << Y$}
+               (5, 1.5)  node[draw,align=center] (SLL) {sll\_1 \\ $C \leftarrow A >> Y$}
+               (3, 1)  node[draw,align=center] (WRB) {wr\_back \\ $RD \leftarrow C$};
+        \draw[->,gray] (DEC) --  (ADD.north);
+        \draw[->,gray] (DEC) --  (AND.north);
+        \draw[->,gray] (DEC) --  node[black] {$(op\_rr\_func \wedge rr\_func\_***) \vee op\_***\_i$} (OR.north);
+        \draw[->,gray] (DEC) --  (SRL.north);
+        \draw[->,gray] (DEC) --  (SLL.north);
+        \draw[->] (ADD.south) -- (WRB);
+        \draw[->] (AND.south) -- (WRB);
+        \draw[->] (OR.south) -- (WRB);
+        \draw[->] (SRL.south) -- (WRB);
+        \draw[->] (SLL.south) -- (WRB);
+        \draw (0.5, 0.8) -- (0.5, 2.2) -- (5.5, 2.2) -- (5.5, 0.8) -- (0.5, 0.8);
+    \end{tikzpicture}
+    \label{fig:fsm}
+    \caption{Neue Zust\"ande der FSM des Steuerwerks}
+\end{figure}
 
-ASSEMBLERPROGRAMM
+In all diesen neuen Zust\"anden (und \texttt{sub}) m\"ussen als Datenquellen die Signale \texttt{s1\_a} und \texttt{s2\_y} gew\"ahlt werden.
+Als Datensenke wird jeweils \texttt{dest\_c} angesteuert.
+
+\subsection*{VHDL-Erweiterung}
+Im n\"achsten Schritt haben wir die gegebenen VHDL-Beschreibungen des Decoders 1, der Zustands\"uberf\"uhrungs- und der Ausgabefunktion erg\"anzt.
+S\"amtliche Namen waren schon vordefiniert und mussten lediglich richtig eingesetzt werden.
+
+\subsubsection*{Decoder 1}
+Der Decoder 1 extrahiert die ALU-Operation aus dem Befehl.
+Dazu gibt es zwei \texttt{case}-Statements:
+Eines, in dem die letzten 6 Bit als RR-Funktion interpretiert werden und eines, bei dem direkt der OP-Code betrachtet wird.
+Diese Konstellation f\"uhrt zu der bei Abbildung \ref{fig:fsm} genannten logischen Formel $(op\_rr\_func \wedge rr\_func\_***) \vee op\_***\_i$.
+Unsere konkreten Erg\"anzungen sind in Listing \ref{lst:dec1} zu sehen.
+Die Kommentare deuten dabei die umgebenen Codezeilen an.
+\lstinputlisting[frame=single, label=lst:dec1, caption=Erg\"anzungen in \texttt{ir\_decode\_1-behavior.vhd}]{decoder1.vhd}
+
+\subsection*{Assemblerprogramm}
 Das Testprogramm besteht lediglich aus einer Aneinanderreihung der neuen Befehle.
 Um den Code kleinzuhalten haben wir darauf verzichtet, die Ergebnisse auf dem Display auszugeben.
 F\"ur die bessere \"Ubersicht \"uber die Resultate haben wir jedem Ergebnis ein eigenes Register zugewiesen.
 So ist es im sp\"ateren Register Dump m\"oglich, das Programm auf Richtigkeit zu pr\"ufen.
 Der Quellcode ist in Listing \ref{lst:test} dargestellt.
-\lstinputlisting[language=assembly, label=lst:test, caption=Testprogramm]{test.asm}
+\lstinputlisting[label=lst:test, caption=Testprogramm, frame=single]{test.asm}
 
 Auch nach der letzten Anweisung eines Programms wird der Befehlsz\"ahler des DLXJ-Prozessors weiter inkrementiert, es werden neue Speicherinhalte geladen und der Prozessor versucht, diese auszuf\"uhren.
 Im g\"unstigsten Fall haben die Speicherinhalte ein ung\"ultiges Format und der Prozessor wechselt in den Error-State.
