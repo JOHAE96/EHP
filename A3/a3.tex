@@ -9,6 +9,8 @@
 \usepackage[ngerman]{babel}
 \usepackage[right=3cm]{geometry}
 \usepackage{listings} % for code
+\lstset{frame=single,numbers=left,breaklines=true}
+
 \usepackage{tikz}
 
 \parindent=0pt
@@ -173,36 +175,63 @@ Dazu gibt es zwei \texttt{case}-Statements:
 Eines, in dem die letzten 6 Bit als RR-Funktion interpretiert werden und eines, bei dem direkt der OP-Code betrachtet wird.
 Diese Konstellation f\"uhrt zu der bei Abbildung \ref{fig:fsm} genannten logischen Formel $(op\_rr\_func \wedge rr\_func\_***) \vee op\_***\_i$.
 Unsere konkreten Erg\"anzungen sind in Listing \ref{lst:dec1} zu sehen.
-Die Kommentare deuten dabei die umgebenen Codezeilen an.
-\lstinputlisting[frame=single, label=lst:dec1, caption=Erg\"anzungen in \texttt{ir\_decode\_1-behavior.vhd}]{decoder1.vhd}
+Die Kommentare deuten dabei die umgebenden Codezeilen an.
+\lstinputlisting[label=lst:dec1, caption=Erg\"anzungen in \texttt{ir\_decode\_1-behavior.vhd}]{decoder1.vhd}
+
+\subsubsection*{Zustands\"uberf\"uhrungsfunktion}
+In der Datei \texttt{fsm\_next-dataflow.vhd} mussten lediglich noch die \"Uberg\"ange von den neuen Zust\"anden zu \texttt{wr\_back} hinzugef\"ugt werden.
+In die neuen Zust\"ande gelangt man \"uber folgende Zeilen, die bereits vorgegeben waren:
+\begin{lstlisting}
+WHEN dec_pcinc4_ab =>
+next_state <= dec_1_in;
+\end{lstlisting}
+
+Nach dem gleichen Muster haben wir, wie in Listing \ref{lst:zuef} zu sehen, unsere die neu definierten Operationen implementiert:
+\lstinputlisting[label=lst:zuef,caption=Erg\"anzungen in \texttt{fsm\_next-dataflow.vhd}]{next_state.vhd}
+
+\subsubsection*{Ergebnisfunktion}
+In der Ergebnis- oder Ausgabefunktion wird festgelegt, welche Signale vom Steuerwerk aus aktiviert werden.
+F\"ur jeden neuen Zustand m\"ussen alle Steuersignale definiert werden, was viel Platz in diesem Dokuemnt kostet.
+Deshalb und wegen der hochgradigen Analogie ist in Listing \ref{lst:resf} lediglich gezeigt, wie wir die Ergebnisfunktion f\"ur den \texttt{add}-Zustand beschrieben haben.
+Die vollst\"andige Erg\"anzung ist im Anhang aufgef\"uhrt.
+\lstinputlisting[label=lst:resf,caption=Auszug aus den Erg\"anzungen in \texttt{fsm\_output-dataflow.vhd},firstline=11,lastline=20]{output_state.vhd}
+
+Wir m\"ochten hier noch einmal auf die Verwendung von \texttt{s2\_Y} hinweisen, die dem Decoder 3 die Wahl des Wertes f\"r den S2-Bus \"uberl\"asst.
+Besondere Vorsicht erfordert auch das Signal \texttt{immed\_sel}, bei dem entschieden wird, ob der Wert der Konstante -- sofern es eine gibt -- vorzeichenerweitert oder mit Nullen aufgef\"ullt an die ALU weitergegeben wird.
+
+Nachdem der Prozessor um die Zust\"ande f\"ur neue arithmetisch-logische Operationen erweitert wurde, haben wir als n\"achstes ein Assemblerprogramm geschrieben, um die Funktionen zu testen.
 
 \subsection*{Assemblerprogramm}
-Das Testprogramm besteht lediglich aus einer Aneinanderreihung der neuen Befehle.
+Dieses Testprogramm besteht aus einer Aneinanderreihung der neuen Befehle.
 Um den Code kleinzuhalten haben wir darauf verzichtet, die Ergebnisse auf dem Display auszugeben.
 F\"ur die bessere \"Ubersicht \"uber die Resultate haben wir jedem Ergebnis ein eigenes Register zugewiesen.
 So ist es im sp\"ateren Register Dump m\"oglich, das Programm auf Richtigkeit zu pr\"ufen.
 Der Quellcode ist in Listing \ref{lst:test} dargestellt.
-\lstinputlisting[label=lst:test, caption=Testprogramm, frame=single]{test.asm}
+\lstinputlisting[label=lst:test, caption=Testprogramm]{test.asm}
 
 Auch nach der letzten Anweisung eines Programms wird der Befehlsz\"ahler des DLXJ-Prozessors weiter inkrementiert, es werden neue Speicherinhalte geladen und der Prozessor versucht, diese auszuf\"uhren.
+Um ungewolltes Verhalten zu verhindern, haben wir unser Programm mit einer Endlosschleife abgeschlossen.
 Im g\"unstigsten Fall haben die Speicherinhalte ein ung\"ultiges Format und der Prozessor wechselt in den Error-State.
+Dann ist es m\"oglich, den Prozessor per reset-Signal zur\"uckzusetzen und Befehl f\"ur Befehl den Code abarbeiten, bis man die offene Stelle findet.
 Es k\"onnten aber auch beliebige Befehle im Speicher stehen die ebenso beliebige Effekte h\"atten.
-Um dies zu verhindern haben wir unser Programm mit einer Endlosschleife abgeschlossen.
-Diese verhindert effektiv, dass der Befehlsz\"ahler hochz\"ahlt, da er immer auf das Label \texttt{end} zur\"uckgesetzt wird.
+Das sollte auf jeden Fall ausgeschlossen werden.
+Eine Endlosschleife verhindert effektiv, dass der Befehlsz\"ahler hochgez\"ahlt wird, da er immer auf das Label \texttt{end} zur\"uckgesetzt wird.
 
 \section{Vorgehensweise}
 In diesem Versuch wurden die zus\"atzlichen Befehle implementiert.
-Anschlie\ss end wurde die Abarbeitung unseres Assemblerprogramms durch den DLXJ-Prozessor simuliert und auf dem Experimentalsystem getestet.
+Anschlie\ss end wurde die Abarbeitung unseres Assemblerprogramms durch den DLXJ-Prozessor simuliert und auf dem Experimentalsystem mit Debugger getestet.
 
 \section{Erprobung}
 Dank unserer ausf\"uhrlichen Vorbereitung konnten wir unsere Aufgaben im Praktikum z\"ugig erledigen.
-Zuerst haben wir die VHDL-Dateien des Decoders 1, der Zust\"ande und der \"Uberf\"uhrungsfunktion angepasst.
+Zuerst haben wir die VHDL-Dateien des Decoders 1, der Ergebnis- und der \"Uberf\"uhrungsfunktion angepasst.
 Dazu haben wir unseren Code an die bereits markierten Stellen kopiert.
-Das \"Ubersetzen mit dem Programm NAME verlief fehlerlos.
+Das \"Ubersetzen mit dem Programm \texttt{dlxj\_analyze\_for\_funcsim} verlief fehlerlos.
 
-Im Anschluss haben wir unser vorbereitetes Assemblerprogramm in den /asm-Ordner kopiert und \"ubersetzen lassen.
-Mit dem Programm NAME konnten wir die Simulation des Assemblerprogramms starten.
-Wir haben beobachtet, wie sich die Steuerleitungen LEITUNG1 und LEITUNG2 im Zeitverlauf verhalten.
+Im Anschluss haben wir unser vorbereitetes Assemblerprogramm in den /asm-Ordner kopiert und mit \texttt{dlxj\_assemble\_program test.asm} \"ubersetzen lassen.
+Mit dem Programm \texttt{dlxj\_simulate\_function} konnten wir die Simulation des Assemblerprogramms starten.
+Hierbei handelte es sich um das gleiche Programm, das auch schon in den Versuchen A1 und A2 zum Einsatz kam.
+Wir haben beobachtet, wie sich die Steuerleitungen \texttt{/b\_en\_out} und \texttt{/immed\_en\_out2} im Zeitverlauf verhalten.
+
 Zudem haben wir die Zust\"ande des Steuerwerks protokolliert, die erwartungsgem\"a\ss\  dem Schema FETCH -> Befehl -> WRITE BACK folgten.
 Die Registerbelegungen im Befehlsverlauf haben wir gedruckt; sie sind im Anhang xy zu finden.
 Es traten keine \"Uberraschungen auf.

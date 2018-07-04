@@ -1,0 +1,12 @@
+-- WHEN sub =>
+--     next_state <= wr_back;
+WHEN add =>
+    next_state <= wr_back;
+WHEN and_1 =>
+    next_state <= wr_back;
+WHEN or_1 =>
+    next_state <= wr_back;
+WHEN sll_1 =>
+    next_state <= wr_back;
+WHEN srl_1 =>
+    next_state <= wr_back;
