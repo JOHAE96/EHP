@@ -222,23 +222,43 @@ In diesem Versuch wurden die zus\"atzlichen Befehle implementiert.
 Anschlie\ss end wurde die Abarbeitung unseres Assemblerprogramms durch den DLXJ-Prozessor simuliert und auf dem Experimentalsystem mit Debugger getestet.
 
 \section{Erprobung}
+\subsection*{Implementierung}
 Dank unserer ausf\"uhrlichen Vorbereitung konnten wir unsere Aufgaben im Praktikum z\"ugig erledigen.
 Zuerst haben wir die VHDL-Dateien des Decoders 1, der Ergebnis- und der \"Uberf\"uhrungsfunktion angepasst.
 Dazu haben wir unseren Code an die bereits markierten Stellen kopiert.
 Das \"Ubersetzen mit dem Programm \texttt{dlxj\_analyze\_for\_funcsim} verlief fehlerlos.
 
+\subsection*{Simulation des Assemblerprogramms}
 Im Anschluss haben wir unser vorbereitetes Assemblerprogramm in den /asm-Ordner kopiert und mit \texttt{dlxj\_assemble\_program test.asm} \"ubersetzen lassen.
 Mit dem Programm \texttt{dlxj\_simulate\_function} konnten wir die Simulation des Assemblerprogramms starten.
 Hierbei handelte es sich um das gleiche Programm, das auch schon in den Versuchen A1 und A2 zum Einsatz kam.
 Wir haben beobachtet, wie sich die Steuerleitungen \texttt{/b\_en\_out} und \texttt{/immed\_en\_out2} im Zeitverlauf verhalten.
+Erwartungsgem\"a\ss\  sind niemals beide gleichzeitig auf 0 gesetzt (also die Leitungen aktiv).
+Bei R-Typ-Befehlen ist \texttt{/b\_en\_out} 0, sodass der Inhalt des Registers B des Datenpfades auf dem S2-Bus liegt.
+Bei I-Typ-Befehlen wird der Immediate-Wert auf den S2-Bus gelegt, indem \texttt{/immed\_en\_out2} den Wert 0 erh\"alt.
+Des Weiteren haben wir die Zust\"ande des Steuerwerks protokolliert, die korrekterweise dem Schema \texttt{FETCH} -> \texttt{DEC\_PCINC4\_AB} -> Befehl -> \texttt{WR\_BACK} folgten.
+Die Registerbelegungen im Befehlsverlauf haben wir gedruckt; sie sind im Anhang xy zu finden, wobei die Ergebnisse jeweils markiert sind.
+Es traten keine Abweichungen von den Vor\"uberlegungen auf.
 
-Zudem haben wir die Zust\"ande des Steuerwerks protokolliert, die erwartungsgem\"a\ss\  dem Schema FETCH -> Befehl -> WRITE BACK folgten.
-Die Registerbelegungen im Befehlsverlauf haben wir gedruckt; sie sind im Anhang xy zu finden.
-Es traten keine \"Uberraschungen auf.
-
+\subsection*{Test des Assemblerprogramms auf dem Experimentalsystem}
+Zuletzt haben wir unsere angepasste Prozessorbeschreibung mittels \texttt{dlxj\_make\_fpga} und \texttt{dlxj\_configure\_fpga} implementiert und auf das FPGA \"ubertragen.
+Mit dem Programm \texttt{dlxj\_program\_rom} lie\ss\  sich der assemblierte Testcode in den Programmspeicher des DLXJ-Prozessors schreiben.
+Nach diesem Vorgang haben wir den Debugger gestartet und das Program mehrmals laufen lassen: sowohl mit Taktperioden- (Kommando \#) als auch mit Befehlsschrittweite (Kommando \texttt{ni}).
+Auch hier konnten wir am Ende die Ergebnisse aus der Vorbereitung in den Registern sehen.
+Ein Memory Dump vom Ende der Bearbeitung liegt im Anhang xy bei.
+Auf diesem kann man auch erkennen, dass die Endlosschleife am Ende des Programms funktioniert:
+Im Instruction Register liegt der Befehl 0x33ff\_fffc.
+\begin{align*}
+\text{0x33fffffc} \equiv \underbrace{\text{0011 00}}_{\text{OP-Code J}}\underbrace{\text{11 1111 1111 1111 1111 1111 1100}}_{\text{Immediate -4}}
+\end{align*}
+Deassembliert ist dies ein Sprungbefehl, der eine Konstante zu dem PC addiert, die in Zweierkomplementdarstellung -4 entspricht.
+Effektiv bedeutet dies, dass sich der PC nicht \"andert; im n\"achsten Durchlauf wird derselbe Befehl in das Instruction Register geladen.
 
 \section{Schlussfolgerungen}
+In diesem Versuch haben wir gelernt, wie ein RISC-Prozessor im Detail funktioniert und wie man ihn debuggen kann.
+Au\ss erdem hat uns dieser Versuch gezeigt, wie hilfreich eine gute Vorbereitung sein kann.
+
+\section{Anhang}
+\lstinputlisting[caption=Erg\"anzungen in \texttt{fsm\_output-dataflow.vhd}]{output_state.vhd}
 
 \end{document}
-
-
