@@ -237,7 +237,7 @@ Erwartungsgem\"a\ss\  sind niemals beide gleichzeitig auf 0 gesetzt (also die Le
 Bei R-Typ-Befehlen ist \texttt{/b\_en\_out} 0, sodass der Inhalt des Registers B des Datenpfades auf dem S2-Bus liegt.
 Bei I-Typ-Befehlen wird der Immediate-Wert auf den S2-Bus gelegt, indem \texttt{/immed\_en\_out2} den Wert 0 erh\"alt.
 Des Weiteren haben wir die Zust\"ande des Steuerwerks protokolliert, die korrekterweise dem Schema \texttt{FETCH} -> \texttt{DEC\_PCINC4\_AB} -> Befehl -> \texttt{WR\_BACK} folgten.
-Die Registerbelegungen im Befehlsverlauf haben wir gedruckt; sie sind im Anhang xy zu finden, wobei die Ergebnisse jeweils markiert sind.
+Die Registerbelegungen im Befehlsverlauf haben wir gedruckt; sie sind im Anhang 2 zu finden, wobei die Ergebnisse jeweils markiert sind.
 Es traten keine Abweichungen von den Vor\"uberlegungen auf.
 
 \subsection*{Test des Assemblerprogramms auf dem Experimentalsystem}
@@ -245,7 +245,7 @@ Zuletzt haben wir unsere angepasste Prozessorbeschreibung mittels \texttt{dlxj\_
 Mit dem Programm \texttt{dlxj\_program\_rom} lie\ss\  sich der assemblierte Testcode in den Programmspeicher des DLXJ-Prozessors schreiben.
 Nach diesem Vorgang haben wir den Debugger gestartet und das Program mehrmals laufen lassen: sowohl mit Taktperioden- (Kommando \#) als auch mit Befehlsschrittweite (Kommando \texttt{ni}).
 Auch hier konnten wir am Ende die Ergebnisse aus der Vorbereitung in den Registern sehen.
-Ein Memory Dump vom Ende der Bearbeitung liegt im Anhang xy bei.
+Ein Memory Dump vom Ende der Bearbeitung liegt im Anhang 3 bei.
 Auf diesem kann man auch erkennen, dass die Endlosschleife am Ende des Programms funktioniert:
 Im Instruction Register liegt der Befehl 0x33ff\_fffc.
 \begin{align*}
