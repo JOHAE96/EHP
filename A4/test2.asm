@@ -11,9 +11,6 @@ zero  equ  X"0000" ; Offset 0
 disp  equ  X"0FFC" ; Offset 0x0FFC
 ram   equ  X"0FF8" ; Offset 0x0FF8
 
-lower equ 3
-upper equ 12
-
 ; r0 ... const 0
 ; r1 ... const 1
 ; r2 ... a_(n-2)
@@ -84,10 +81,10 @@ loop    add.i r9,r0, dualbits   ; init. Laufvariable fuer Anzahl der shifts
         add.i r3,r0,X"f"        ; init. Tetradenmaske
         add.i r5,r0,5           ; init. Tetradenvergleichswert
         add.i r7,r0,3           ; init. Tetradenkorrekturwert
-        lw.i r1, zero(r30)      ; lade die Dualzahl in r1
+        lw.i r1, zero(r30)      ; lade die Dualzahl in r1 |\label{line:test2load}|
         add.i r15, r15, 1       ; i++
-        add.i r30, r30, 4       ; 
-        add.i r31, r31, 4       ; 
+        add.i r30, r30, 4       ; erhoehe r30 in jedem Durchlauf um 4
+        add.i r31, r31, 4       ; erhoehe r31 in jedem Durchlauf um 4
 ;; BCD-Korrektur:
 ;; -------------
 ;; SHIFTING

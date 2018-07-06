@@ -9,7 +9,7 @@
 \usepackage[right=3cm]{geometry}
 \usepackage{listings} % for code
 \lstdefinelanguage{Assembler}{comment=[l]{;}}
-\lstset{frame=single, numbers=left, breaklines=true, commentstyle=\emph, language=Assembler}
+\lstset{frame=single, numbers=left, breaklines=true, commentstyle=\emph, language=Assembler,escapechar=|}
 
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
@@ -89,39 +89,46 @@ Gesamtbewertung:
 \section{Vorbereitung}
 Dieser Versuch baut direkt auf dem Versuch A4 auf.
 Als Vorbereitung haben wir zwei Assemblerprogramme geschrieben, die in diesem Versuch im Debugger untersucht werden sollen.
-Beide berechnen Fibonacci-Zahlen, das erste mit dem Basisbefehlssatz und das zweite mit dem im letzten Versuch erweiterten.
+Beide berechnen Fibonacci-Zahlen, das erste mit dem Basisbefehlssatz und das zweite mit dem im letzten Versuch erweiterten Befehlssatz.
 Aufgrund der L\"ange sind die Programme im Anhang zu finden.
 
 \subsection*{Fibonacci-Folge in Assembler}
-Das erste davon in Listing \ref{lst:fibbase} ist das mit dem Basisbefehlssatz.
+Das erste davon (in Listing \ref{lst:fibbase}) ist das mit dem Basisbefehlssatz.
 Die Hauptschwierigkeit hierbei war der fehlende Additionsbefehl, sodass die Algorithmen und die Laufvariablenmechanik angepasst werden mussten.
-So haben wir in einem der Register bei der Berechnung der Fibonacci-Zahlen den negativen Wert gespeichert, der bei der Subtraktion effektiv addiert wird.
+So haben wir in einem der Register (\texttt{R3}) bei der Berechnung der Fibonacci-Zahlen den negativen Wert gespeichert, der bei der Subtraktion effektiv addiert wird.
 Auch f\"ur die Laufvariable gibt es negative Grenzen und es wird r\"uckw\"arts gez\"ahlt.
 F\"ur die Ansteuerung des Hauptspeichers haben wir zwei Register verwendet:
-Eines speichert die negative Adresse, die in jedem Durchlauf weiter heruntergez\"ahlt wird und eines die tats\"achliche Adresse, mit der dann auf den Speicher zugegriffen wird.
-Der Hauptspeicher nutzt 32-Bit-Worte, weshalb die Zugriffsadresse in jedem Durchlauf um 4 ver\"andert werden muss.
-Um die Schleife abzubrechen, muss die Laufvariable gr\"o\ss er sein als die Obergrenze.
-Da es nur den Vergleichsoperator < gibt, muss das Vergleichsergebnis anschlie\ss end negiert werden.
+Eines speichert die Adresse und eines enth\"alt die Konstante -4, sodass sich die Speicheradresse in Zeile \ref{line:fibbaseadd4} effektiv um 4 erh\"oht.
+Die 4 ist n\"otig, da der Speicher 32-Bit-Worte enth\"alt, also zwei Adressen 4 Byte auseinanderliegen.
+Um die Schleife abzubrechen, muss die Laufvariable genauso gro\ss{} sein wie die Obergrenze\footnote{gemeint ist die in absoluten Zahlen obere Grenze}.
+In diesem Befehlssatz gibt es nur den Vergleichsoperator <, weswegen man f\"ur die Abbruchbedingung entweder die Laufvariable von der Obergrenze subtrahieren oder das Ergebnis des Kleiner-als-Operators negieren k\"onnte.
+Wir haben uns f\"ur die zweite Variante entschieden, da wir diese als n\"aher an der Vorgehensweise in h\"oheren Sprachen empfunden haben, was dem Verstehen des Codes zugute kommen soll.
 
 Das zweite Programm ist in Listing \ref{lst:fibext} aufgef\"uhrt.
-Mit dem erweiterten Befehlssatz l\"asst sich das Programm verk\"urzen, insbesondere der Initialisierungsteil.
-Ebenso ist die Programmlogik nun einfacher nachzuvollziehen.
+Nat\"urlich h\"atte man hier eine Kopie des ersten Programmes erstellen k\"onnen, da der Basisbefehlssatz eine Teilmenge des erweiterten ist, jedoch wollten wir die M\"oglichkeiten des letzteren nutzen.
+Mit dem erweiterten Befehlssatz l\"asst sich das Programm gut k\"urzen, insbesondere im Initialisierungsteil.
+Hier mussten wir zuvor viele Anweisungen wiederholen, um beispielsweise der Obergrenze den Wert -13 zuzuweisen.
+Dies l\"asst sich mit Immediate-Befehlen viel \"ubersichtlicher und damit robuster gestalten.
 Beide Programme werden durch eine Endlosschleife beendet, um ungewolltes Verhalten zu verhindern.
 
-In einem n\"achsten Schritt sollten beide Programme nun hintereinander ausgef\"uhrt werden, beginnend mit dem Programm mit erweitertem Befehlssatz.
+In einem n\"achsten Schritt sollten beide Programme nun hintereinander ausgef\"uhrt werden, beginnend mit dem Programm \ref{lst:fibext}.
 Nach dem Hintereinanderkopieren m\"ussen die Endlosschleife und die \texttt{end}-Anweisung zwischen den Programmen gel\"oscht werden.
+Zudem darf nun die Speicheradresse im zweiten Programmteil nicht erneut initialisiert werden und das dortige \texttt{for}-Label muss umbenannt werden.
+Alle anderen Register haben wir neu initialisiert, um beide Programme m\"oglichst original hintereinander auszuf\"uhren.
 Der korrekte Programmcode ist in Listing \ref{lst:test1} angeh\"angt.
 
 \subsection*{BCD-Umwandlung in Assembler}
 In einem n\"achsten Schritt haben wir ein vorgegebenes BCD-Umwandlungsprogramm untersucht und kommentiert.
-Diese Version befindet sich im Anhang.
+Diese Version befindet sich im Anhang xy.
 Anschlie\ss{}end haben wir die Berechnung der Fibonacci-Zahlen mit der BCD-Umwandlung verbunden.
 Dies ist in Listing \ref{lst:test2} zu sehen.
 Das Ziel war es, die berechneten Fibonacci-Zahlen unter der Hex-Darstellung im Speicher auch in Dezimalschreibweise lesen zu k\"onnen.
 Daf\"ur mussten ein paar Anpassungen gemacht werden.
 Zum ersten braucht das BCD-Programm eine \"au\ss{}ere Schleife, um mehrere Zahlen umzuwandeln.
 Diese ist durch den Code unter dem Label \texttt{loop} realisiert.
-Zus\"atzlich ist dort der ehemalige \texttt{ini\_bcd}-Teil untergebracht. 
+Zus\"atzlich ist dort der ehemalige \texttt{ini\_bcd}-Teil untergebracht.
+Hier mussten ein paar \"Anderungen vorgenommen werden.
+So wird in \texttt{R1} in Zeile \ref{line:test2load} nicht mehr die vordefinierte Konstante geladen, sondern die aktuelle Fibonacci-Zahl aus dem Speicher.
 Unter dem Label befindet sich nun die Initialisierung des ganzen BCD-Programmteils, also der Schleifenvariablen und Speicherzugriffsadressen.
 
 \section{Vorgehensweise}
@@ -151,7 +158,9 @@ Im dem folgenden Memory Dump wurde eine Zahl zu wenig umgewandelt, sodass wir \t
 Mit diesen \"Anderungen funktionierte das Programm ordnungsgem\"a\ss{}, wie der Memory Dump in Anhang xy bezeugt.
 
 \section{Schlussfolgerungen}
-
+In diesem Versuch durften wir lernen, wie konzentriert und organisiert man bei der Assemblerprogrammierung vorgehen muss.
+Ein Plan aller Registerbedeutungen ist ebenso unerl\"asslich wie eine regelm\"a\ss{}ige \"Uberpr\"ufung der Programmlogik.
+Im Nachhinein betrachtet h\"atten wir sicherlich auch einige Stellen effizienter gestalten k\"onnen, wollten die Programme aber nicht ungetestet f\"ur das Protokoll \"andern.
 
 \section{Anhang}
 \lstinputlisting[label=lst:fibbase, caption=Berechnung der Fibonacci-Zahlen mit Basisbefehlssatz, firstline=8]{fib_base.asm}\clearpage

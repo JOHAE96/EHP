@@ -45,7 +45,7 @@ for:
     sub r2, r0, r3      ; a_(n-2) <- - (-a_(n-1))
     sub r3, r0, r4      ; a_(n-1) <- -a_n
     sw.i zero(r31), r4  ; RAM[i] <- a_n
-    sub r31, r31, r30   ; r31 -= -4
+    sub r31, r31, r30   ; r31 -= -4 |\label{line:fibbaseadd4}| 
     sub r7, r7, r1      ; i--
     slt r8, r6, r7      ; r8 <- -upper < -i
     sub r8, r1, r8      ; r8 <- not r8
