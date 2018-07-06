@@ -121,18 +121,43 @@ Das Ziel war es, die berechneten Fibonacci-Zahlen unter der Hex-Darstellung im S
 Daf\"ur mussten ein paar Anpassungen gemacht werden.
 Zum ersten braucht das BCD-Programm eine \"au\ss{}ere Schleife, um mehrere Zahlen umzuwandeln.
 Diese ist durch den Code unter dem Label \texttt{loop} realisiert.
-Zus\"atzlich
-
+Zus\"atzlich ist dort der ehemalige \texttt{ini\_bcd}-Teil untergebracht. 
+Unter dem Label befindet sich nun die Initialisierung des ganzen BCD-Programmteils, also der Schleifenvariablen und Speicherzugriffsadressen.
 
 \section{Vorgehensweise}
+In diesem Praktikum haben wir unsere Vorbereitung implementiert und auf der Hardware getestet.
 
 \section{Erprobung}
+Diesen Versuch konnten wir erst versp\"atet beginnen, weil unser Computer durch ein loses Netzwerkkabel stillstand.
+
+\subsection*{Fibonacci-Berechnung}
+In diesem Teil sind zuerst ein paar Syntaxfehler aufgetreten, die aber schnell beseitigt waren.
+Dabei handelte es sich um einen Fehler der Form \texttt{add.i r7, 1} und um das Vergessen der Kennzeichnung eines I-Typ-Befehls.
+Im Anschluss lie\ss{} sich das Programm \"ubersetzen und auf das FPGA \"ubertragen.
+Beim Begutachten der Ergebnisse fiel dann auf, dass das Programm mit dem Basisbefehlssatz eine Zahl zu wenig berechnet hat.
+Aus diesem Grund haben wir die Obergrenze dann von -12 auf -13 gesetzt, so wie es in den Listings \ref{lst:fibbase} und \ref{lst:test1} zu sehen ist.
+Nach den Korrekturen lief das Programm wie es sollte.
+Der abschlie\ss{}ende Memory Dump ist in Anhang xy.
+Darauf ist zu sehen, dass die Fibonacci-Zahlen korrekt berechnet sind und dass auch die Register die erwarteten Inhalte haben.
+Zudem ist auch das Instruction Register wieder mit dem Befehl zur Endlosschleife geladen.
+
+\subsection*{BCD-Umwandlung}
+In diesem Teil hatten wir zun\"achst beide Fibonacci-Programme vor der Umwandlung zu stehen.
+Nach dem wiederholten Lesen der Aufgabenstellung haben wir das Programm korrigiert.
+Auch dieses Programm hatte einen logischen Fehler, dessen Suche lange gedauert hat.
+Das Symptom war, dass zu wenige Zahlen umgewandelt wurden.
+Schuld war, dass wir auch von der Obergrenze in \texttt{R16} 4 abgezogen hatten, so wie wir dies mit den Laufvariablen und Speicheradressen gemacht hatten, um die innere Schleife mit einer Imkrementierung der genannten Variablen um 4 beginnen konnten.
+Im dem folgenden Memory Dump wurde eine Zahl zu wenig umgewandelt, sodass wir \texttt{R16} noch um 1 erh\"oht haben.
+Mit diesen \"Anderungen funktionierte das Programm ordnungsgem\"a\ss{}, wie der Memory Dump in Anhang xy bezeugt.
 
 \section{Schlussfolgerungen}
+
 
 \section{Anhang}
 \lstinputlisting[label=lst:fibbase, caption=Berechnung der Fibonacci-Zahlen mit Basisbefehlssatz, firstline=8]{fib_base.asm}\clearpage
 \lstinputlisting[label=lst:fibext, caption=Berechnung der Fibonacci-Zahlen mit erweitertem Befehlssatz, firstline=7]{fib_ext.asm}\clearpage
+\lstinputlisting[label=lst:test1, caption=Hintereinanderausf\"uhrung der beiden Fibonacci-Programme, firstline=7]{test1.asm}\clearpage
+\lstinputlisting[label=lst:test2, caption=Berechnung der Fibonacci-Zahlen und anschlie\ss{}ende BCD-Umwandlung, firstline=7]{test2.asm}\clearpage
 
 \end{document}
 

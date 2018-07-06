@@ -78,8 +78,7 @@ ini_bcd lw.i r30, ram(r0)       ; lade die erste RAM-Adresse in r30
         sub.i r15, r0, 1        ; init. Laufvariable fuer Anzahl der umzuwand. Zahlen
         add.i r16, r0, 9    ; init. Obergrenze fuer Anzahl der umzuwand. Zahlen
         add.i r16, r16, 1
-;; Kommentar oder whatever
-;;
+;; Hauptschleife, die die BCD-Umwandlung initialisiert
 loop    add.i r9,r0, dualbits   ; init. Laufvariable fuer Anzahl der shifts
         add.i r2,r0,0           ; init. BCD-Ergebnis auf 0
         add.i r3,r0,X"f"        ; init. Tetradenmaske
