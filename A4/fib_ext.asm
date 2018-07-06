@@ -31,12 +31,12 @@ init:
     sub.i r7, r5, X"1"  ; r7 <- 2
     lw.i r31, ram(r0)   ; r31 <- 0x1000_0000
 for:
-    add r7, r7, X"1"    ; i++
+    add.i r7, r7, X"1"    ; i++
     add r4, r2, r3      ; a_n <- a_(n-2) + a_(n-1)
     add r2, r0, r3      ; a_(n-2) <- a_(n-1)
     add r3, r0, r4      ; a_(n-1) <- a_n
     sw.i zero(r31), r4  ; RAM[i] <- a_n
-    add.i r31, X"4"     ; r31 += 4 
+    add.i r31, r31, X"4"; r31 += 4 
     slt r8, r7, r6      ; r8 <- i < upper
     sub r8, r1, r8      ; r8 <- not r8
     beqz r8, for

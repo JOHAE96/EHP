@@ -1,0 +1,139 @@
+\documentclass[12pt,a4paper]{scrartcl}
+
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{times}
+\usepackage[T1]{fontenc} 
+\usepackage[latin1]{inputenc} 
+\usepackage[ngerman]{babel}
+\usepackage[right=3cm]{geometry}
+\usepackage{listings} % for code
+\lstdefinelanguage{Assembler}{comment=[l]{;}}
+\lstset{frame=single, numbers=left, breaklines=true, commentstyle=\emph, language=Assembler}
+
+\parindent=0pt
+\parskip=1em plus 2pt minus 1pt
+
+\topskip-2cm
+\textheight25cm
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\rhead{\thepage}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+  \LARGE
+  Praktische \"Ubungen - \\
+  Experimentelle Hardwareprojekte \\
+  \bigskip
+  \Large 
+  Versuchsprotokoll
+\end{center}
+
+\vspace{1em}
+Versuch: A4 -- Assemblerprogrammierung eines RISC-Prozessors
+
+Versuchsdatum und -zeit: 28. Juni 2018, 10 Uhr - 13 Uhr
+
+Betreuer: Andreas Reinsch 
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Alexander K\"uhnle, B.Sc. Informatik, 165692
+
+Email: alexander.kuehnle@uni-jena.de
+
+\vspace{1em}
+Name, Studiengang, Mat.-Nr.: Mark Umnus, B.Sc. Informatik, 167419
+
+Email: mark.umnus@uni-jena.de
+
+\vspace*{1cm}
+%% \mbox{}\\
+\hrule
+\vspace*{1cm}
+{\Large  Eigenst\"andigkeitserkl\"arung }
+ 
+Hiermit versichern wir, dass wir das Protokoll selbstst\"andig verfasst
+und keine anderen Quellen und Hilfsmittel als die angegebenen benutzt 
+haben. Im Falle einer Zuwiderhandlung erkennen wir an, dass unser Protokoll 
+als nicht bestanden bewertet wird und damit das Modul ``Experimentelle 
+Hardwareprojekte'' als nicht bestanden bewertet wird. \\
+Dar\"uberhinaus ist uns klar, dass jede Zuwiderhandlung ausnahmslos dem 
+Rechtsamt der FSU gemeldet wird, woraus weitere Konsequenzen resultieren 
+k\"onnen. \\
+
+Unterschriften: \\ 
+\hspace*{4cm} ........................................ 
+\hspace{2cm} ........................................  \\
+
+\hrule
+
+\vspace*{0.3cm}
+\textbf{Vom Betreuer auszuf\"ullen:}
+
+Vorbereitung/Kolloquium:
+
+Durchf\"uhrung:
+
+Protokoll:
+
+Gesamtbewertung:
+\clearpage
+
+
+% Hier geht das Protokoll los...
+
+\section{Vorbereitung}
+Dieser Versuch baut direkt auf dem Versuch A4 auf.
+Als Vorbereitung haben wir zwei Assemblerprogramme geschrieben, die in diesem Versuch im Debugger untersucht werden sollen.
+Beide berechnen Fibonacci-Zahlen, das erste mit dem Basisbefehlssatz und das zweite mit dem im letzten Versuch erweiterten.
+Aufgrund der L\"ange sind die Programme im Anhang zu finden.
+
+\subsection*{Fibonacci-Folge in Assembler}
+Das erste davon in Listing \ref{lst:fibbase} ist das mit dem Basisbefehlssatz.
+Die Hauptschwierigkeit hierbei war der fehlende Additionsbefehl, sodass die Algorithmen und die Laufvariablenmechanik angepasst werden mussten.
+So haben wir in einem der Register bei der Berechnung der Fibonacci-Zahlen den negativen Wert gespeichert, der bei der Subtraktion effektiv addiert wird.
+Auch f\"ur die Laufvariable gibt es negative Grenzen und es wird r\"uckw\"arts gez\"ahlt.
+F\"ur die Ansteuerung des Hauptspeichers haben wir zwei Register verwendet:
+Eines speichert die negative Adresse, die in jedem Durchlauf weiter heruntergez\"ahlt wird und eines die tats\"achliche Adresse, mit der dann auf den Speicher zugegriffen wird.
+Der Hauptspeicher nutzt 32-Bit-Worte, weshalb die Zugriffsadresse in jedem Durchlauf um 4 ver\"andert werden muss.
+Um die Schleife abzubrechen, muss die Laufvariable gr\"o\ss er sein als die Obergrenze.
+Da es nur den Vergleichsoperator < gibt, muss das Vergleichsergebnis anschlie\ss end negiert werden.
+
+Das zweite Programm ist in Listing \ref{lst:fibext} aufgef\"uhrt.
+Mit dem erweiterten Befehlssatz l\"asst sich das Programm verk\"urzen, insbesondere der Initialisierungsteil.
+Ebenso ist die Programmlogik nun einfacher nachzuvollziehen.
+Beide Programme werden durch eine Endlosschleife beendet, um ungewolltes Verhalten zu verhindern.
+
+In einem n\"achsten Schritt sollten beide Programme nun hintereinander ausgef\"uhrt werden, beginnend mit dem Programm mit erweitertem Befehlssatz.
+Nach dem Hintereinanderkopieren m\"ussen die Endlosschleife und die \texttt{end}-Anweisung zwischen den Programmen gel\"oscht werden.
+Der korrekte Programmcode ist in Listing \ref{lst:test1} angeh\"angt.
+
+\subsection*{BCD-Umwandlung in Assembler}
+In einem n\"achsten Schritt haben wir ein vorgegebenes BCD-Umwandlungsprogramm untersucht und kommentiert.
+Diese Version befindet sich im Anhang.
+Anschlie\ss{}end haben wir die Berechnung der Fibonacci-Zahlen mit der BCD-Umwandlung verbunden.
+Dies ist in Listing \ref{lst:test2} zu sehen.
+Das Ziel war es, die berechneten Fibonacci-Zahlen unter der Hex-Darstellung im Speicher auch in Dezimalschreibweise lesen zu k\"onnen.
+Daf\"ur mussten ein paar Anpassungen gemacht werden.
+Zum ersten braucht das BCD-Programm eine \"au\ss{}ere Schleife, um mehrere Zahlen umzuwandeln.
+Diese ist durch den Code unter dem Label \texttt{loop} realisiert.
+Zus\"atzlich
+
+
+\section{Vorgehensweise}
+
+\section{Erprobung}
+
+\section{Schlussfolgerungen}
+
+\section{Anhang}
+\lstinputlisting[label=lst:fibbase, caption=Berechnung der Fibonacci-Zahlen mit Basisbefehlssatz, firstline=8]{fib_base.asm}\clearpage
+\lstinputlisting[label=lst:fibext, caption=Berechnung der Fibonacci-Zahlen mit erweitertem Befehlssatz, firstline=7]{fib_ext.asm}\clearpage
+
+\end{document}
+
+

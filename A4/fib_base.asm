@@ -1,8 +1,9 @@
-;---------------------------------------------------------------
-; Calculation of die Fibbonacci numbers F_n for n = 3, ..., 12
+;---------------------------------------
+; Calculation of die Fibbonacci numbers
+; F_n for n = 3, ..., 12
 ; using the basic instruction set.
 ;
-;---------------------------------------------------------------
+;---------------------------------------
 
 org X"00000000"
 start init
@@ -17,11 +18,12 @@ ram   equ  X"0FF8" ; Offset 0x0FF8
 ; r3 ... -a_(n-1)
 ; r4 ... a_n
 ; r5 ... -lower (= -3)
-; r6 ... -upper (= -12)
+; r6 ... -(upper+1) (= -13)
 ; r7 ... i
 ; r8 ... tmp variable deciding when to exit the for loop
+; r29 ... tmp register for memory addressing
 ; r30 ... const -4
-; r31 ... memory address
+; r31 ... negative memory address
 
 init:
     lw.i r31, ram(r0)   ; r31 <- M[0x0000_0FF8]
@@ -36,13 +38,16 @@ init:
     sub r6, r6, r5      ; r6 <- 9
     sub r6, r6, r5      ; r6 <- 12
     sub r6, r0, r6      ; r6 <- -12
+    sub r6, r6, r1      ; r6 <- -13
     sub r7, r5, r0      ; r7 <- -3
     sub r30, r5, r1     ; r30 <- -4
+    sub r31, r0, r31    ; change r31 to negative
 for:
     sub r4, r2, r3      ; a_n     <- a_(n-2) - (-a_(n-1))
     sub r2, r0, r3      ; a_(n-2) <- - (-a_(n-1))
     sub r3, r0, r4      ; a_(n-1) <- -a_n
-    sw.i zero(r31), r4  ; RAM[i] <- a_n
+    sub r29, r0, r31    ; r29 <- -r31
+    sw.i zero(r29), r4  ; RAM[i] <- a_n
     sub r31, r31, r30   ; r31 -= -4
     sub r7, r7, r1      ; i--
     slt r8, r6, r7      ; r8 <- -upper < -i
