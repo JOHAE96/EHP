@@ -36,7 +36,7 @@ for:
     add r2, r0, r3      ; a_(n-2) <- a_(n-1)
     add r3, r0, r4      ; a_(n-1) <- a_n
     sw.i zero(r31), r4  ; RAM[i] <- a_n
-    add.i r31, X"4"     ; r31 += 4 
+    add.i r31, r31, X"4"; r31 += 4 
     slt r8, r7, r6      ; r8 <- i < upper
     sub r8, r1, r8      ; r8 <- not r8
     beqz r8, for
@@ -64,6 +64,7 @@ for:
     sub r6, r6, r5      ; r6 <- 9
     sub r6, r6, r5      ; r6 <- 12
     sub r6, r0, r6      ; r6 <- -12
+    sub r6, r6, r1      ; r6 <- -13
     sub r7, r5, r0      ; r7 <- -3
     sub r30, r5, r1     ; r30 <- -4
 for2:
