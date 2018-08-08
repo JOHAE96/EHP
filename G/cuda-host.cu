@@ -64,17 +64,6 @@ void bwCuda(unsigned char* img_in, unsigned char* img_out, int width, int height
 
 void sobelCuda(unsigned char* img_in, unsigned char* img_out, int width, int height)
 {
-   //TODO: Aufgabe 2.5 Kantendetektion Hostcode
-   //0. bwCuda() Code kopieren und um Folgendes erweitern:
-
-   //1. temporäres GPU Array definieren und mittels cudaMalloc anlegen (verwenden Sie als Namen z.B. img_bw_dev)
-
-   //2. bwKernel ausführen und in img_bw_dev schreiben
-
-   //3. sobelKernel ausführen und von img_bw_dev lesen, schreiben in img_out_dev
-
-   //4. img_bw_dev Array wieder frei geben mit cudaFree
-
 	unsigned char *img_in_dev, *img_out_dev, *img_bw_dev;
    	int size=width*height*4;
    	cudaMalloc((void**)&img_in_dev,size*sizeof(unsigned char));
@@ -89,6 +78,5 @@ void sobelCuda(unsigned char* img_in, unsigned char* img_out, int width, int hei
    	cudaFree(img_in_dev);
    	cudaFree(img_out_dev);
    	cudaFree(img_bw_dev);
-
 }
 

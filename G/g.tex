@@ -8,8 +8,10 @@
 \usepackage[latin1]{inputenc} 
 \usepackage[ngerman]{babel}
 \usepackage[right=3cm]{geometry}
-\usepackage{listings} % for code
-\lstset{language=C, numbers=left}
+\usepackage{listings}
+\lstset{language=C,numbers=left,frame=single,breaklines=true,escapeinside={//\%}{\%}}
+\usepackage{graphicx}
+\usepackage{csvsimple}
 
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
@@ -30,7 +32,8 @@
   Experimentelle Hardwareprojekte \\
   \bigskip
   \Large 
-  Versuchsprotokoll
+  Versuchsprotokoll\\
+  \small{\emph{\"Uberarbeitete Fassung vom 09. August 2018}}
 \end{center}
 
 \vspace{1em}
@@ -89,34 +92,53 @@ Gesamtbewertung:
 % Hier geht das Protokoll los...
 
 \section{Vorbereitung}
-
-Um Berechnungen zu paralellisieren und dementsprechend auch enorm zu beschleunigen werden heutzutage Multicore-Prozessoren verwendet.
+Um Berechnungen zu parallelisieren und dementsprechend auch enorm zu beschleunigen, werden heutzutage Multicore-Prozessoren verwendet.
 Seit einigen Jahren gib es nun aber auch die M\"oglichkeit, Grafikkarten mit ihrer hohen Anzahl an Kernen f\"ur allgemeine Berechnungen zu verwenden.
 Diese Eigenschaft namens \textit{General Purpose computing on Graphics Processing Units}, oder in kurz auch GPGPU, wird im Versuch G praktisch angewandt.
 
 Mithilfe von bereitgestellten Nvidia-Grafikkarten, welche mit CUDA C programmiert werden k\"onnen, sollen typische Operationen der Bildbearbeitung implementiert werden.
 Au\ss erdem soll die Performance der Implementierung analysiert werden.
-Dazu sollen auch m\"ogliche Optimierungsm\"oglichkeiten der Codes gesucht, implementiert, analyisert und mit dem urspr\"unglichen Werten verglichen werden.
+Dazu sollen auch m\"ogliche Optimierungsm\"oglichkeiten der Codes gesucht, implementiert, analyisert und mit den urspr\"unglichen Werten verglichen werden.
 
 
 \section{Vorgehensweise}
 Uns wurden drei Server mit Nvidia-Grafikkarten zur Verf\"ugung gestellt, mit denen wir uns per \texttt{ssh} verbinden konnten.
-F\"ur den Praktikumsteil G1 soll eine Grafikkarte so programmiert werden, dass ein Bild damit bearbeitet wird.
-Dazu wurden uns neben einem Testbild die Datei \texttt{cuda-kernels.cu} f\"ur die Programmierung der Kernels f\"ur das \textit{Device} und die \texttt{cuda-host.cu} f\"ur den Code, welcher auf \textit{Host}-Seite ausgef\"uhrt werden soll, bereitgestellt.
-Konkret soll dieses in der Helligkeit und im Kontrast angepasst, gespiegelt und in ein Graubild \"uberf\"uhrt werden.
-Zudem soll eine Kantendetektion angewendet werden.
+Das Ziel des Praktikumsteils G1 ist es, eine Grafikkarte so zu programmieren, dass damit Bilder modifiziert werden k\"onnen.
+Dazu wurden uns neben einem Testbild die folgenden Dateien zur Verf\"ugung gestellt:
+
+\begin{description}
+    \item [\texttt{cuda-kernels.cu}] Dieser Code wird auf der Grafikkarte ausgef\"uhrt, weswegen die Funktionalit\"at der Bildbearbeitung hier implementiert ist.
+    \item [\texttt{cuda-host.cu}] Dieser Code wird auf dem Host ausgef\"uhrt. Er dient der Konfiguration und Ansteuerung der Grafikkarte.
+    \item [\texttt{cuda-prak}] Dies ist das Executable, das aus dem Code entsteht.
+\end{description}
+
+Zudem lag ein Makefile bei, mit dem wir unsere Programme kompilieren und testen konnten.
+Konkret sollte das Bild in der Helligkeit und im Kontrast angepasst, gespiegelt und in ein Graubild \"uberf\"uhrt werden.
+Als komplexeste Aufgabe wurde final eine Kantendetektion angewendet.
 Der Hostcode ist dabei zum gr\"o\ss ten Teil vorgegeben, der Devicecode muss im Laufe des Versuchs angepasst werden.
 
-F\"ur den Praktikumsteil G2 soll mit dem bereitgestellten Programm \texttt{cuda-nvvp} eine Performance-Analyse f\"ur die verschiedenen in G1 implementierten Kernels durchgef\"uhrt werden.
-Es sollen die Anzahl an FLOPSs, der Datendurchsatz der Speicheroperationen und die Daten\"ubertragungsrate zwischen dem \textit{Device} und dem \textit{Host} analysiert werden.
-Dazu wird ebenfalls die Speichereffizienz auf dem globalen Speicher des \textit{Device} beobachtet.
+F\"ur den Praktikumsteil G2 wurden zus\"atzlich folgende Programme bereitgestellt:
 
-Daraufhin sollten unsere Kernelcodes auf Performance optimiert werden, indem wir auf anderen Datentypen arbeiten.
-Konkret sollten wir in den Kernels in \texttt{cuda-kernels.cu} aus dem Versuch G1 anstatt \texttt{unsigned char} f\"ur die Farbwerte des Bildes den Datentyp \texttt{unsigned int} verwenden, um die Anzahl der Lade- und Speicheroperationen zu minimieren.
-Zum Schluss wird der neue Code erneut mit dem Programm \texttt{cuda-nvvp} auf Performance analysiert und mit den alten Werten verglichen.
+\begin{description}
+    \item [\texttt{cuda-kernels-int.cu}, \texttt{cuda-host-in.cu} und \texttt{cuda-prak-int}] Diese erf\"ullen die gleichen Aufgaben wie ihre oberen Gegenst\"ucke mit dem Unterschied, dass der \texttt{unsigned int}-Datentyp anstelle von \texttt{unsigned char} verwendet wird.
+    \item [\texttt{cuda-nvvp}] Dieses Programm f\"uhrt eine Performance-Analyse f\"ur die verschiedenen in G1 implementierten Kernels durch.
+    \item [\texttt{cuda-nvvp-int}] Hier sind die G2-Kernels das Ziel der Performance-Analyse.
+    \item [\texttt{nvvp}] Der \emph{Nvidia Visual Profiler}, der detaillierte Einblicke in die Performance erm\"oglicht.
+\end{description}
+
+Gegenstand der Analyse waren die Anzahl an FLOPSs, der Datendurchsatz der Speicheroperationen und die Daten\"ubertragungsrate zwischen dem \textit{Device} und dem \textit{Host} analysiert werden.
+Dazu wurde ebenfalls die Speichereffizienz auf dem globalen Speicher des \textit{Device} beobachtet.
+
+Daraufhin sollten die G1-Kernelcodes optimiert werden, indem, wie bereits angesprochen, der Datentyp des Bildes ge\"andert wird.
+Konkret wurde f\"ur die Farbwerte des Bildes den Datentyp \texttt{unsigned int} verwendet, um die Anzahl der Lade- und Speicheroperationen zu minimieren.
+Zum Schluss wird der Code erneut mit dem Programm \texttt{cuda-nvvp} analysiert und mit den alten Werten verglichen.
+
+
 \section{Erprobung}
 
 \subsection{Aufgabenteil G1}
+In diesem Aufgabenteil sind viele Zeilen Code entstanden, weswegen die vollst\"andigen Dateien im Anhang ab Seite \pageref{anhang} aufgef\"uhrt sind.
+Dieser ist separat geklammert, um neben den Flie\ss{}text gelegt zu werden.
 
 \subsubsection{Bild kopieren}
 Diese Aufgabe diente als Einf\"uhrung, um mit dem Programmiermodell vertraut zu werden.
@@ -124,197 +146,101 @@ Au\ss erdem war damit Code gegeben, auf dem in den anderen Aufgaben aufgebaut we
 Die Kompilierung und die Ausf\"uhrung liefen wie erwartet.
 
 \subsubsection{Helligkeit/Kontrast anpassen}
-Die Ver\"anderung von Kontrast und Helligkeit eines Bildpunktes ist formal eine lineare Abbildung.
-Der Kontrast l\"asst sich anpassen, indem der Farbwert eines Bildpunktes mit einem Faktor multipliziert wird.
-Die Helligkeit wird per Addition angepasst.
-Ver\"andert werden dabei nur die RGB-Werte, der Alphakanal bleibt unber\"uhrt.
-Nach der Berechnung muss beachtet werden, dass die Bildpunkte vom Typ \texttt{unsigned char} sind, was bedeutet, dass sie Werte zwischen 0 und 255 annehmen.
+Die Ver\"anderung von Kontrast und Helligkeit eines Bildpunktes ist formal eine lineare Abbildung:
+
+\begin{equation}\label{eq:linKernel}
+    c_{neu} = \alpha \cdot c_{alt} + \beta
+\end{equation}
+
+Der Kontrast l\"asst sich anpassen, indem der Farbwert eines Bildpunktes mit einem Faktor $\alpha$ multipliziert wird.
+Die Helligkeit wird per Addition mit $\beta$ angepasst.
+Ver\"andert werden dabei nur die RGB-Werte von $c$, der Alphakanal bleibt unber\"uhrt.
+Nach der Berechnung muss beachtet werden, dass der Bildpunkt $c_{neu}$ vom Typ \texttt{unsigned char} ist, was bedeutet, dass er Werte zwischen 0 und 255 annimmt.
 Aus diesem Grund muss man kleinere oder gr\"o\ss ere Werte entsprechend anpassen.
-Insgesamt haben wir den folgenden Kernel verwendet:
-
-\begin{lstlisting}[caption=linearTransformKernel,label=a2.2]
-int adrIn=(i+j*width)*4;
-int adrOut=adrIn;
-unsigned char r,g,b,a;
-float r_new, g_new, b_new;
-        
-r = img_in[adrIn+0];
-g = img_in[adrIn+1];
-b = img_in[adrIn+2];
-a = img_in[adrIn+3];
-        
-r_new = alpha*r + beta;
-r_new = r_new < 0?     0 : r_new;
-r_new = r_new > 255? 255 : r_new;
-        
-g_new = alpha*g + beta;
-g_new = g_new < 0?     0 : g_new;
-g_new = g_new > 255? 255 : g_new;
-        
-b_new = alpha*b + beta;
-b_new = b_new < 0?     0 : b_new;
-b_new = b_new > 255? 255 : b_new;
-        
-img_out[adrOut+0] = (unsigned char)r_new;
-img_out[adrOut+1] = (unsigned char)g_new;
-img_out[adrOut+2] = (unsigned char)b_new;
-img_out[adrOut+3] = a;
-
-\end{lstlisting}
-
-In Listing \ref{a2.2} wurde lediglich der Ausschnitt innerhalb der if-Abfrage des Indexes aufgef\"uhrt, da der \"au\ss ere Teil ohnehin immer gleich ist.
-Die eigentliche Berechnung findet innerhalb der Zeilen 11 bis 21 statt.
-Zuerst wird die lineare Abbildung angewendet, dann werden die Werte auf das Intervall $[1,255]$ beschr\"ankt.
-Abschlie\ss end ist ein Cast nach \texttt{unsigned char} n\"otig.
+In Listing \ref{a2.2} (Seite \pageref{a2.2}) geschah dies innerhalb der Zeilen \ref{line:linearStart} bis \ref{line:linearEnd}.
+Zuerst wird die lineare Abbildung angewendet, dann werden die Werte auf das Intervall $[0,255]$ beschr\"ankt.
+Abschlie\ss end ist ein Cast nach \texttt{unsigned char} n\"otig, da die berechneten Farbwerte vom Typ \texttt{float} sind.
 
 \subsubsection{Bild spiegeln}
 Nun sollte die linke Bildseite auf die rechte gespiegelt werden.
-In dieser Hinsicht unterscheidet sich diese Aufgabe kaum von der ersten, es muss lediglich die Inputadresse angepasst werden.
-Die Formeln daf\"ur waren bereits in der Versuchsvorbereitung gegeben, konkret handelt es sich um die Formeln (1) und (3).
-Kombiniert man beide, ergibt sich die Berechnung, die in Listung \ref{a2.3} verwendet wird:
+In dieser Hinsicht unterscheidet sich diese Aufgabe kaum von der ersten, es muss lediglich die Leseadresse angepasst werden.
+Die Formeln daf\"ur waren in Einzelteilen bereits in der Versuchsvorbereitung gegeben.
 
-\begin{lstlisting}[caption=mirrorKernel,label=a2.3]
-int adrIn;
-int adrOut=(i+j*width)*4;
-unsigned char r,g,b,a;
+\begin{align}
+    adr & = (i + j \cdot width) \cdot 4 \nonumber\\
+    c_{neu}(i,j) & =
+        \begin{cases}
+            c_{alt}(i,j) & \text{falls } i < width/2\\
+            c_{alt}(width-i,j) & \text{sonst }
+        \end{cases} \nonumber 
+\end{align}
 
-if (i < width/2) {
-    adrIn=adrOut;
-} else {
-    adrIn=(width-i+j*width)*4;
-}
+Substituiert man $c_{alt}(i,j)$ mit der Adressberechnung, so ergibt sich die Formel, die in Listing \ref{a2.3} verwendet wird:
 
-r = img_in[adrIn+0];
-g = img_in[adrIn+1];
-b = img_in[adrIn+2];
-a = img_in[adrIn+3];
+\begin{equation} \label{eq:mirror}
+    c_{neu}(i,j) =
+        \begin{cases}
+            (i + j \cdot width) \cdot 4 & \text{falls } i < width/2\\
+            (width-i + j \cdot width) \cdot 4 & \text{sonst }
+        \end{cases}
+\end{equation}
 
-img_out[adrOut+0] = r;
-img_out[adrOut+1] = g;
-img_out[adrOut+2] = b;
-img_out[adrOut+3] = a;
-
-\end{lstlisting}
-
-Die betroffene Zeile 8 l\"asst die jeweilige Zeile im Bild (\texttt{j*width}) unver\"andert und w\"ahlt die Spalte von rechts nach links aus, wodurch der Spiegelungseffekt entsteht.
+Die betroffene Zeile \ref{line:mirror} l\"asst die jeweilige Zeile im Bild (\texttt{j*width}) unver\"andert und w\"ahlt die Spalte von rechts nach links aus, wodurch der Spiegelungseffekt entsteht.
 Der Faktor 4 ist notwendig, da jeder Bildpunkt aus 4 Werten (RGBA) besteht.
 
 \subsubsection{Graubild erstellen}
 In dieser Aufgabe sollte ein Graubild basierend auf dem Inputbild erstellt werden.
 Mathematisch wird dabei jeder Kanal eines Bildpunkts im Ergebnisbild auf den Durchschnitt der Kanalwerte des Bildpunktes im Ausgangsbild gesetzt.
 Dabei bleibt der Alphakanal wieder einmal unber\"uhrt.
-Listing \ref{a2.4} zeigt den verwendeten Kernel, bei dem sich lediglich die Zeilen 11 bis 15 von dem Kopierkernel unterscheiden. 
-
-\begin{lstlisting}[caption=bwKernel,label=a2.4]
-int adrIn=(i+j*width)*4;
-int adrOut=adrIn;
-unsigned char r,g,b,a;
-unsigned char bw;
-
-r = img_in[adrIn+0];
-g = img_in[adrIn+1];
-b = img_in[adrIn+2];
-a = img_in[adrIn+3];
-
-bw = (r+g+b)/3;
-
-img_out[adrOut+0] = bw;
-img_out[adrOut+1] = bw;
-img_out[adrOut+2] = bw;
-img_out[adrOut+3] = a;
-\end{lstlisting}
+Listing \ref{a2.4} zeigt den verwendeten Kernel, welcher sich nur geringf\"ugig vom Kopierkernel unterscheidet. 
 
 Insgesamt war diese Aufgabe als Vorbereitung auf die n\"achste zu sehen, welche ein Graubild als Ausgangsbild ben\"otigt.
 
 \subsubsection{Kantendetektion mit Sobel-Filter}
 Eine detaillierte Erl\"auterung der Funktionsweise des Sobel-Filters findet sich in Abschnitt 1.1.5 der Versuchsbeschreibung.
 Zusammengefasst werden zwei mit Sobel-Operatoren gewichtete Summen $g_x$ und $g_y$ von einem Bildpunkt und seinen 8 Nachbarn gebildet.
-In einem zweiten Schritt wird die 2-Norm des Vektors ($g_x g_y$) als Grauwert in das Ergebnisbild geschrieben, das hei\ss t derselbe Wert in jeden Farbkanal.
-Unsere Implementierung ist in Listing \ref{a2.5} zu sehen.
+In einem zweiten Schritt wird die 2-Norm des Vektors ($g_x g_y$) gebildet, auf den Wertebereich der Farbkan\"ale gerundet und als Grauwert in das Ergebnisbild geschrieben, das hei\ss t derselbe Wert in jeden Farbkanal.
+Per Definition erhalten Randpixel im Zielbild eine schwarze Farbe.
+Unsere in diesem Versuch verwendete Implementierung ist in Listing \ref{a2.5old} zu sehen.
+Diese enthielt jedoch einige Fehler -- auch bez\"uglich der Aufgabenstellung -- weswegen im Folgenden eine verbesserte Variante, n\"amlich Listing \ref{a2.5}  besprochen wird.
+In Zeile \ref{line:sobelBoarder} wird gepr\"uft, ob der Bildpunkt ein Randpunkt ist und dementsprechend auf schwarz gesetzt werden muss.
+Dies ist auch gleichzeitig der gr\"o\ss{}te Unterschied zur im Versuch benutzten Variante.
+Hier gingen wir davon aus, dass mit der Bezeichnung "Rand" Bildpunkte au\ss{}erhalb des Bildes gemeint sind.
+Die Folge war, dass innerhalb der gleich besprochenen Summation f\"ur jeden Pixel abgefragt werden musste, ob sein Nachbar au\ss{}erhalb des Bildes liegt.
+In Listing \ref{a2.5old} ist dies in Zeile \ref{line:sobelOldIf} zu sehen.
 
-\begin{lstlisting}[caption=sobelKernel,label=a2.5,breaklines=true]
-int adrIn;
-int adrOut=(i+j*width)*4;
-int i_new, j_new, bw;
-unsigned char r,a;    // is enough since r=g=b in a grayscale picture
-
-float gX = 0.0f, gY = 0.0f;
-
-for (int k = -1; k <= 1; k++) {
-    for (int l = -1; l <= 1; l++) {
-        i_new = i+k;
-        j_new = j+l;
-
-        if (i_new < 0 || i_new > width || j_new < 0 || j_new > height) {
-            r = 0;
-        } else {
-            adrIn=(i_new+j_new*width)*4;
-            r = img_in[adrIn];
-        }
-
-        gX += SX[1+k][1+l] * r;
-        gY += SY[1+k][1+l] * r;
-    }
-}
-
-adrIn = adrOut;
-a = img_in[adrIn+3];
-
-bw = sqrtf (gX*gX + gY*gY);
-
-img_out[adrOut+0] = bw;
-img_out[adrOut+1] = bw;
-img_out[adrOut+2] = bw;
-img_out[adrOut+3] = a;
-\end{lstlisting}
-
-Die Summen $g_x$ und $g_y$ werden durch die for-Schleifen in den Zeilen 8 bis 23 realisiert.
+Die Summen $g_x$ und $g_y$ werden durch die for-Schleifen realisiert.
 Die Variablen \texttt{i\_new} und \texttt{j\_new} sind dabei die Koordinaten des Nachbarn, der gerade getrachtet wird.
-Falls sie au\ss erhalb des Bildes liegen sollten, wird ein schwarzer Bildpunkt als Berechnungsgrundlage gew\"alht (Zeilen 13 und 14).
-Anderenfalls muss die Adresse im Bildarray berechnet und der jeweilige Farbwert geladen werden.
+Auf Basis dieser muss die Adresse im Ausgangsbild-Array berechnet und der jeweilige Farbwert geladen werden.
 Es reicht an dieser Stelle vollkommen aus, nur einen Kanal zu laden, da das Ausgangsbild ein Graubild ist, welches die selben Farbwerte in allen Kan\"alen hat.
 Wir haben zur leichteren Adressierung den Rotkanal gew\"ahlt.
-In den Zeilen 20 und 21 wird dann die gewichtete Summation und in Zeile 28 wird anschlie\ss end die Normberechnung vorgenommen.
-Bevor der Output geschrieben werden kann, muss der Wert des Alphakanals geladen werden, was in Zeile 26 geschieht.
+In den Zeilen \ref{line:sobelSum}f wird dann die gewichtete Summation und in Zeile \ref{line:sobelNorm} wird anschlie\ss end die Normberechnung vorgenommen.
+Hier ist ein zweiter Fehler im Originalcode zu finden:
+Die \texttt{int}-Variable \texttt{bw} wird mit dem Wert aus der Wurzel beschrieben, der zum einen ein \texttt{float}-Wert ist und zum anderen au\ss{}erhalb des Wertebreichs f\"ur die Farbkan\"ale liegen kann.
+In der \"uberarbeiteten Version wurde deswegen noch eine Korrektur wie im linearTransformKernel hinzugef\"ugt.
+Bevor der Output geschrieben werden kann, muss der Wert des Alphakanals geladen werden, was in Zeile \ref{line:sobelLoadAlpha} geschieht.
 Das Ergebnis des Sobel-Filters ist ein Graubild, weshalb wieder jeder Kanal denselben Wert erh\"alt.
 
 Im zweiten Teil dieser Aufgabe musste noch der Host-Code geschrieben werden.
-Dieser besitzt gro\ss e \"Ahnlichkeiten zu den \"ubrigen Host-Codes, jedoch gibt es den Unterschied, dass der Graubild- und der Sobel-Kernel nacheinander auf der GPU berechnet werden sollen, ohne dass das Zwischenergebnis auf die CPU kopiert werden soll.
+Dieser besitzt gro\ss{}e \"Ahnlichkeiten zu den \"ubrigen Host-Codes, jedoch gibt es den Unterschied, dass der Graubild- und der Sobel-Kernel nacheinander auf der GPU berechnet werden sollen, ohne dass das Zwischenergebnis auf den Host kopiert wird.
 Dazu musste ein Zwischenspeicher auf der GPU reserviert werden, der als Ausgabe f\"ur den bwKernel und als Input f\"ur den sobelKernel verwendet wird.
 Nach der Verwendung muss auch dieser Speicher freigegeben werden.
-Ein Teil der Aufgabe war, dass der Code aus \texttt{bwCuda()} kopiert werden soll.
-In Listing \ref{a2.5host} sind deshalb die Zeilen mit einem Kommentar gekennzeichnet, die wir ver\"andert bzw. hinzugef\"ugt haben.
-
-\begin{lstlisting}[caption=sobelCuda,label=a2.5host,breaklines=true]
-unsigned char *img_in_dev, *img_out_dev, *img_bw_dev; //Zwischenspeicher *img_bw_dev deklariert
-int size=width*height*4;
-cudaMalloc((void**)&img_in_dev,size*sizeof(unsigned char));
-cudaMalloc((void**)&img_out_dev,size*sizeof(unsigned char));
-cudaMalloc((void**)&img_bw_dev,size*sizeof(unsigned char)); // Zwischenspeicher reserviert
-dim3 threads(16,16);
-dim3 grid(width/threads.x+1,height/threads.y+1);
-cudaMemcpy(img_in_dev,img_in,size*sizeof(unsigned char),cudaMemcpyHostToDevice); // Zwischenspeicher als Ausgabeziel
-bwKernel<<<grid,threads>>>(img_in_dev,img_bw_dev,width,height); // Zwischenspeicher als Eingabe
-sobelKernel<<<grid,threads>>>(img_bw_dev,img_out_dev,width,height);
-cudaMemcpy(img_out,img_out_dev,size*sizeof(unsigned char),cudaMemcpyDeviceToHost);
-cudaFree(img_in_dev);
-cudaFree(img_out_dev);
-cudaFree(img_bw_dev); // Freigeben des Zwischenspeicher
-\end{lstlisting}
+Auf Seite \pageref{a2.5host} ist das zugeh\"orige Listing \ref{a2.5host} zu finden.
 
 \subsection{Aufgabenteil G2}
 Dieser Aufgabenteil befasste sich mit der Analyse der zuvor geschriebenen Programme.
-Anschlie\ss end wurden die berechneten Werte genutzt, um die Effizienz zu erh\"ohen.
+Die Messwerte sind im Anhang ab Seite \pageref{ergebnisse} zu finden.
+Anschlie\ss{}end wurden die erhaltenen Werte genutzt, um die Effizienz zu erh\"ohen.
 
 \subsubsection{Performance-Analyse}
-Mit Hilfe des Programms \texttt{cuda-nvvp} wurden die Zeiten gemessen, die die Kernel auf verschiedenen Bildgr\"o\ss en gebraucht haben.
+Mit Hilfe des Programms \texttt{cuda-nvvp} wurden die Zeiten gemessen, die die Kernel auf verschiedenen Bildgr\"o\ss{}en gebraucht haben.
 Zus\"atzlich wurden die Zeiten f\"ur die Organisation angezeigt, also f\"ur das Reservieren und Freigeben von Speicher und f\"ur das \"Ubertragen der Daten.
-Die Durchschnittszeiten sind dabei auf Abbildung 1 zu sehen.
-Hier sieht man deutlich, dass k\"urzere Zeiten erreicht werden, wenn die Threadkonfiguration gr\"o\ss ere Bl\"ocke vorsieht.
+Die Durchschnittszeiten sind dabei auf Abbildung \ref{fig:timesize} zu sehen.
+Hier sieht man deutlich, dass k\"urzere Zeiten erreicht werden, wenn die Threadkonfiguration gr\"o\ss{}ere Bl\"ocke vorsieht.
 Das gilt f\"ur alle Kernel.
 Der Speedup-Faktor liegt dabei zwischen der kleinsten und der gr\"o\ss ten Konfiguration bei ungef\"ahr 50 und ist relativ unabh\"angig von der Bildgr\"o\ss e.
 
-Auf Abbildung 2 kann man die Verbesserung der einzelnen Kernel auf dem gleichen Bild betrachten.
+Auf Abbildung \ref{fig:timekernel} kann man die Verbesserung der einzelnen Kernel auf dem gleichen Bild betrachten.
 Die anderen Bildgr\"o\ss en zeigen ganz \"ahnliche Verl\"aufe.
 Auch hier sieht man, dass es f\"ur jeden einzelnen Kernel vorteilhaft ist, mit einer gro\ss en Konfiguration angewendet zu werden.
 
@@ -355,11 +281,11 @@ Im folgenden Abschnitt betrachtet man die Bilder als Integer-Arrays, um pro Pixe
 Um die Berechnungen gr\"o\ss tenteils beibehalten zu k\"onnen mussten wir Makros definieren, wie es in der Versuchsbeschreibung auf den Seiten 15 und 16 beschrieben ist.
 Zusammengefasst trennt man den geladenen Integerwert in Bytes auf und f\"ugt ihn nach der Berechnung wieder zusammen.
 Dabei werden die Shiftoperationen genutzt.
-Es musste zudem beachtet werden, dass die Adressen zweier aufeinanderfolgender Pixel nun nicht mehr um 4 auseinanderliegen, sondern nur noch um 1.
+Es musste zudem beachtet werden, dass die Adressen zweier aufeinanderfolgender Pixel nun nicht mehr um vier auseinanderliegen, sondern nur noch um eins.
 Als Beispiel haben wir den Integer-sobelKernel im Anhang dieses Protokolls gezeigt.
 Auch der Hostcode musste angepasst werden, um die Bilder als Integer-Arrays zu behandelt.
 
-Die anschlie\ss end mit cuda-nvvp-int gemessenen Werte sind in Tabelle \ref{perf-int} aufgef\"uhrt.
+Die anschlie\ss end mit \texttt{cuda-nvvp-int} gemessenen Werte sind in Tabelle \ref{perf-int} aufgef\"uhrt.
 
 \begin{table}[h]
     \centering
@@ -380,19 +306,61 @@ Die anschlie\ss end mit cuda-nvvp-int gemessenen Werte sind in Tabelle \ref{perf
 
 Die Ergebnisse sind erwartungsgem\"a\ss\ besser ausgefallen als die mit der char-Verwendung.
 Vor allem der sobelKernel, der die meisten Ladeoperationen hat, profitiert davon.
-Das sieht man auch auf Abbildung 4, bei der sich die Store Efficiency auf ganze 99.8\% erh\"oht hat.
+Das sieht man auch auf Abbildung \ref{fig:sobelint}, bei der sich die Store Efficiency auf ganze 99.8\% erh\"oht hat.
 Die Load Efficiency hat sich ebenfalls erh\"oht, wenn auch nicht so stark.
 Im sobelKernel sind viel mehr Ladeoperationen n\"otig, die zudem nur einen Farbkanal ben\"otigen, sodass der Effekt nicht so stark ausf\"allt.
 
 
 \section{Schlussfolgerungen}
 In diesem Versuch wurde gezeigt, dass GPUs m\"achtige Werkzeuge sind, die man aber korrekt handhaben muss, um das meiste Potenzial aus ihnen herauszuholen.
-Vor allem die geringe Speicherbandbreite zwischen Host und Device bzw. zwischen dem Global Memory und den Recheneinheiten begrenzen die Geschwindigkeit nach oben.
+Vor allem die geringe Speicherbandbreite zwischen Host und Device bzw. zwischen dem Global Memory und den Recheneinheiten begrenzt die Geschwindigkeit von oben.
 Aus diesem Grund sollte man haupts\"achlich solche Teile auf die GPU auslagern, die viel rechnen und wenige Speicherzugriffe ben\"otigen.
 Zus\"atzlich kann man die Berechnungen beschleunigen, indem man die Konfiguration der Bl\"ocke und Threads den Daten anpasst.
 
+\newpage
 \section{Anhang}
-\lstinputlisting[firstline=119,lastline=160,caption=sobelKernel,breaklines=true]{cuda-kernels-int.cu}
+\appendix
+\label{anhang}
+
+\section{Programme}
+\lstinputlisting[firstline=24,lastline=59,caption=linearTransformKernel in \texttt{cuda-kernels.cu},label=a2.2]{cuda-kernels.cu} \newpage
+\lstinputlisting[firstline=61,lastline=89,caption=mirrorKernel in \texttt{cuda-kernels.cu},label=a2.3]{cuda-kernels.cu} \newpage
+\lstinputlisting[firstline=91,lastline=115,caption=bwKernel in \texttt{cuda-kernels.cu},label=a2.4]{cuda-kernels.cu} \newpage
+\lstinputlisting[firstline=117,lastline=161,caption=sobelKernel in \texttt{cuda-kernels.cu},label=a2.5old]{cuda-kernels.cu} \newpage
+\lstinputlisting[firstline=1,lastline=45,caption=verbesserter sobelKernel,label=a2.5]{cuda-kernels-better.cu} \newpage
+\lstinputlisting[firstline=65,lastline=81,caption=sobelCuda in \texttt{cuda-host.cu},label=a2.5host]{cuda-host.cu} \newpage
+\lstinputlisting[firstline=119,lastline=160,caption=sobelKernel in \texttt{cuda-kernels-int.cu},breaklines=true]{cuda-kernels-int.cu}
+
+\section{Analyseergebnisse}
+\label{ergebnisse}
+\begin{figure}[h]
+    \caption{}
+    \includegraphics[width=0.9\textwidth]{times(size).png}
+    \label{fig:timesize}
+\end{figure}
+
+\begin{figure}[h]
+    \caption{}
+    \includegraphics[width=0.9\textwidth]{times(kernel).png}
+    \label{fig:timekernel}
+\end{figure}
+
+\begin{figure}[h]
+    \caption{Nvidia Visual Profiler angewendet auf cuda-prak}
+    \includegraphics[width=0.9\textwidth]{Sobel_Char_Efficiency.png}
+    \label{fig:sobelchar}
+\end{figure}
+
+\begin{figure}[h]
+    \caption{Nvidia Visual Profiler angewendet auf cuda-prak-int}
+    \includegraphics[width=0.9\textwidth]{Sobel_Int_Efficiency.png}
+    \label{fig:sobelint}
+\end{figure}
+
+\begin{table}[h]
+    \csvautotabular{test.csv}
+    \caption{Messwerte}
+    \label{tab:messwerte}
+\end{table}
+
 \end{document}
-
-

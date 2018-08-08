@@ -39,7 +39,7 @@ __global__ void linearTransformKernel(unsigned char* img_in, unsigned char* img_
         b = img_in[adrIn+2];
         a = img_in[adrIn+3];
         
-        r_new = alpha*r + beta;
+        r_new = alpha*r + beta;             //%\label{line:linearStart}%
         r_new = r_new < 0?     0 : r_new;
         r_new = r_new > 255? 255 : r_new;
 
@@ -49,14 +49,13 @@ __global__ void linearTransformKernel(unsigned char* img_in, unsigned char* img_
 
         b_new = alpha*b + beta;
         b_new = b_new < 0?     0 : b_new;
-        b_new = b_new > 255? 255 : b_new;
+        b_new = b_new > 255? 255 : b_new;   //%\label{line:linearEnd}%
 
         img_out[adrOut+0] = (unsigned char)r_new; 
         img_out[adrOut+1] = (unsigned char)g_new;
         img_out[adrOut+2] = (unsigned char)b_new;
         img_out[adrOut+3] = a;
     }
-
 }
 
 __global__ void mirrorKernel(unsigned char* img_in, unsigned char* img_out, int width, int height)
@@ -71,11 +70,11 @@ __global__ void mirrorKernel(unsigned char* img_in, unsigned char* img_out, int 
         int adrOut=(i+j*width)*4;
         unsigned char r,g,b,a;
         
-        if (i < width/2) {
+        if (i < width/2) {      // //%Adressberechnung nach Formel (\ref{eq:mirror})%
             adrIn=adrOut;
         
         } else {
-            adrIn=(width-i+j*width)*4;
+            adrIn=(width-i+j*width)*4; %\label{line:mirror}%
         }
         r = img_in[adrIn+0];
         g = img_in[adrIn+1];
@@ -87,7 +86,6 @@ __global__ void mirrorKernel(unsigned char* img_in, unsigned char* img_out, int 
         img_out[adrOut+2] = b;
         img_out[adrOut+3] = a;
     }
-
 }
 
 __global__ void bwKernel(unsigned char* img_in, unsigned char* img_out, int width, int height)
@@ -118,9 +116,6 @@ __global__ void bwKernel(unsigned char* img_in, unsigned char* img_out, int widt
 
 __global__ void sobelKernel(unsigned char* img_in, unsigned char* img_out, int width, int height)
 {
-  
-   //TODO: Aufgabe 2.5 Kantendetektion mit Sobelfilter Kernel implementieren
-   //Kommentieren Sie die folgenden Anweisungen aus um die SX und SY Arrays zu erhalten
     const float SX[3][3]={{-1,0,1},{-2,0,2},{-1,0,1}};
     const float SY[3][3]={{-1,-2,-1},{0,0,0},{1,2,1}};
 
@@ -132,7 +127,7 @@ __global__ void sobelKernel(unsigned char* img_in, unsigned char* img_out, int w
     	int adrIn;
     	int adrOut=(i+j*width)*4;
         int i_new, j_new, bw;
-        unsigned char r,a;    // is enough since r=g=b in a grayscale picture
+        unsigned char r,a;
 
         float gX = 0.0f, gY = 0.0f;
 
@@ -141,7 +136,7 @@ __global__ void sobelKernel(unsigned char* img_in, unsigned char* img_out, int w
                 i_new = i+k;
                 j_new = j+l;
 
-                if (i_new < 0 || i_new > width || j_new < 0 || j_new > height) {
+                if (i_new < 0 || i_new > width || j_new < 0 || j_new > height) { //%\label{line:sobelOldIf}%
                     r = 0;
                 } else {
                     adrIn=(i_new+j_new*width)*4;
@@ -163,5 +158,4 @@ __global__ void sobelKernel(unsigned char* img_in, unsigned char* img_out, int w
         img_out[adrOut+2] = bw;
         img_out[adrOut+3] = a;
     }
-
 }
