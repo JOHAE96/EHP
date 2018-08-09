@@ -12,6 +12,7 @@
 \lstset{language=C,numbers=left,frame=single,breaklines=true,escapeinside={//\%}{\%}}
 \usepackage{graphicx}
 \usepackage{csvsimple}
+\usepackage{float}
 
 \parindent=0pt
 \parskip=1em plus 2pt minus 1pt
@@ -185,7 +186,7 @@ Substituiert man $c_{alt}(i,j)$ mit der Adressberechnung, so ergibt sich die For
         \end{cases}
 \end{equation}
 
-Die betroffene Zeile \ref{line:mirror} l\"asst die jeweilige Zeile im Bild (\texttt{j*width}) unver\"andert und w\"ahlt die Spalte von rechts nach links aus, wodurch der Spiegelungseffekt entsteht.
+Die betroffene Zeile \ref{line:mirror} im Code l\"asst die jeweilige Zeile im Bild (\texttt{j*width}) unver\"andert und w\"ahlt die Spalte von rechts nach links aus, wodurch der Spiegelungseffekt entsteht.
 Der Faktor 4 ist notwendig, da jeder Bildpunkt aus 4 Werten (RGBA) besteht.
 
 \subsubsection{Graubild erstellen}
@@ -229,26 +230,39 @@ Auf Seite \pageref{a2.5host} ist das zugeh\"orige Listing \ref{a2.5host} zu find
 
 \subsection{Aufgabenteil G2}
 Dieser Aufgabenteil befasste sich mit der Analyse der zuvor geschriebenen Programme.
-Die Messwerte sind im Anhang ab Seite \pageref{ergebnisse} zu finden.
-Anschlie\ss{}end wurden die erhaltenen Werte genutzt, um die Effizienz zu erh\"ohen.
+Zu diesem Zweck lag ein Bild in drei verschiedenen Gr\"o\ss{}en bereit, 1500x1000, 3000x2000 und 6000x4000 Pixel.
+Daraus berechnen sich Speichergr\"o\ss{}en zwischen 5.7 und 91.55 MiB, welche sp\"ater ben\"otigt werden.
+Die Ergebnisse des Versuchs sind im Anhang ab Seite \pageref{ergebnisse} zu finden.
 
 \subsubsection{Performance-Analyse}
-Mit Hilfe des Programms \texttt{cuda-nvvp} wurden die Zeiten gemessen, die die Kernel auf verschiedenen Bildgr\"o\ss{}en gebraucht haben.
+Mit Hilfe des Programms \texttt{cuda-nvvp} wurden die Zeiten gemessen, die die Kernel auf den verschiedenen Bildern gebraucht haben.
 Zus\"atzlich wurden die Zeiten f\"ur die Organisation angezeigt, also f\"ur das Reservieren und Freigeben von Speicher und f\"ur das \"Ubertragen der Daten.
-Die Durchschnittszeiten sind dabei auf Abbildung \ref{fig:timesize} zu sehen.
+Genaue Zahlen sind in den Tabellen ab Seite pageref{rohdaten} aufgef\"uhrt.
+Die Durchschnittszeiten der Messungen sind auf Abbildung \ref{fig:timesize} zu sehen.
 Hier sieht man deutlich, dass k\"urzere Zeiten erreicht werden, wenn die Threadkonfiguration gr\"o\ss{}ere Bl\"ocke vorsieht.
 Das gilt f\"ur alle Kernel.
-Der Speedup-Faktor liegt dabei zwischen der kleinsten und der gr\"o\ss{}ten Konfiguration bei ungef\"ahr 50 und ist relativ unabh\"angig von der Bildgr\"o\ss{}e.
+Gleichzeitig erfolgen die Berechnungen auf dem 6000x4000-Bild bei optimaler Konfiguration schneller als die auf dem kleinsten Bild bei schlechter Konfiguration.
+Der Speedup-Faktor zwischen der 1x1- und der besten Konfiguration liegt jeweils bei ungef\"ahr 50 und ist relativ unabh\"angig von der Bildgr\"o\ss{}e.
 
-Auf Abbildung \ref{fig:timekernel} kann man die Verbesserung der einzelnen Kernel auf dem gleichen Bild betrachten.
+Auf Abbildung \ref{fig:timekernel} kann man die Verbesserung der einzelnen Kernel auf dem gleichen Bild betrachten, w\"ahrend die Blockkonfigurationen wieder auf der x-Achse abgetragen sind.
 Die anderen Bildgr\"o\ss{}en zeigen ganz \"ahnliche Verl\"aufe.
 Auch hier sieht man, dass es f\"ur jeden einzelnen Kernel vorteilhaft ist, mit einer gro\ss{}en Konfiguration angewendet zu werden.
+Interessant an den zugeh\"origen Daten in Tabelle \ref{tab:messwertemedium} ist, dass der copyKernel verh\"altnism\"a\ss{}ig langsam ist, obwohl er kaum etwas zu rechnen hat.
+Allerdings macht ihn genau das langsam:
+Grafikkarten k\"onnen gut rechnen, Speicheroperationen sind jedoch langsam und blockieren sich gegenseitig, wenn zu viele gleichzeitig laufen.
 
 F\"ur das \"Ubertragen der Daten wurden Zeiten von 1.363ms f\"ur das kleine Bild und 19.5ms f\"ur das gr\"o\ss{}te Bild gemessen.
-Zusammen mit den Bildgr\"o\ss{}en von 6000000 bis 96000000 Byte ergeben sich Speicherbandbreiten zwischen 4.098 und 4.58 GiB/s.
+Gem\"a\ss{} der Formel
+
+\begin{align}\label{form:bandbreite}
+    \text{Speicherbandbreite}[\frac{Byte}{s}] = \frac{\text{Datenmenge}[Byte]}{\text{Zeit}[s]}
+\end{align}
+
+ergeben sich Speicherbandbreiten zwischen 4.0997 und 4.58 GiB/s.
 Diese sind f\"ur die gleiche Bildgr\"o\ss{}e auch sehr \"ahnlich, wenn man Host->Device und Device->Host vergleicht.
 
-In der besten Konfiguration, also das gr\"o\ss{}te Eingabebild und die gr\"o\ss{}te Threadkonfiguration, erreichen die Kernel die in Tabelle \ref{tab:perf} dargestellten Werte.
+In der performantesten Konfiguration, also mit 24MP-Eingabebild und 32x32-Threadkonfiguration, erreichen die Kernel die in Tabelle \ref{tab:perf} dargestellten Werte.
+Die Berechnung der Performance erfolgte analog zu Formel (\ref{form:bandbreite}) in $\frac{FLOPS}{s}$.
 
 \begin{table}[h]
     \centering
@@ -269,7 +283,7 @@ In der besten Konfiguration, also das gr\"o\ss{}te Eingabebild und die gr\"o\ss{
 
 F\"ur den copyKernel und den mirrorKernel haben wir keine FLOPS/s angegeben, da keine FP-Arithmetik verwendet wird.
 Beim linearTransformKernel treten 6 FLOPS auf, beim bwKernel 3 und beim sobelKernel 40.
-Die Speicheroperationen sind bei jedem Kernel 8 (4 zum Laden, 4 zum Speichern), au\ss er beim sobelKernel, wo die Anzahl der Speicheroperationen zwischen 8 und 14 liegt, je nachdem, ob der betrachtete Pixel in der Mitte, an der Kante oder sogar Ecke des Bildes liegt.
+Die Speicheroperationen sind bei jedem Kernel 8 (4 zum Laden, 4 zum Speichern), au\ss{}er beim sobelKernel, wo die Anzahl der Speicheroperationen in unserer Fassung zwischen 9 und 14\footnote{definitiv den Alphakanal laden, 4 Kan\"ale schreiben und in den Schleifen 4 bis 9 laden} lag, je nachdem, ob der betrachtete Pixel in der Mitte, an der Kante oder sogar Ecke des Bildes liegt.
 In der Tabelle \ref{tab:perf} haben wir mit 14 gerechnet, weil das auf den gr\"o\ss{}ten Teil der Pixel zutrifft.
 
 Um noch genauere Informationen zu erhalten, haben wir den Nvidia Visual Profiler genutzt.
@@ -334,34 +348,80 @@ Insbesondere zu kleine Blockkonfigurationen sollten vermieden werden, da sonst d
 
 \section{Analyseergebnisse}
 \label{ergebnisse}
-\begin{figure}[h]
+\begin{figure}[H]
     \caption{}
     \includegraphics[width=0.9\textwidth]{times(size).png}
     \label{fig:timesize}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
     \caption{}
     \includegraphics[width=0.9\textwidth]{times(kernel).png}
     \label{fig:timekernel}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
     \caption{Nvidia Visual Profiler angewendet auf cuda-prak}
     \includegraphics[width=0.9\textwidth]{Sobel_Char_Efficiency.png}
     \label{fig:sobelchar}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
     \caption{Nvidia Visual Profiler angewendet auf cuda-prak-int}
     \includegraphics[width=0.9\textwidth]{Sobel_Int_Efficiency.png}
     \label{fig:sobelint}
 \end{figure}
 
-\begin{table}[h]
-    \csvautotabular{test.csv}
-    \caption{Messwerte}
-    \label{tab:messwerte}
+\section{Rohdaten}
+\label{rohdaten}
+\begin{table}[H]
+    \centering
+    \csvautotabular{smallimage-char.csv}
+    \caption{char-Messwerte auf kleinem Bild in ms}
+    \label{tab:messwerteklein}
 \end{table}
+
+\begin{table}[H]
+    \centering
+    \csvautotabular{mediumimage-char.csv}
+    \caption{char-Messwerte auf mittlerem Bild in ms}
+    \label{tab:messwertemedium}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \csvautotabular{largeimage-char.csv}
+    \caption{char-Messwerte auf gro\ss{}em Bild in ms}
+    \label{tab:messwertelarge}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \csvautotabular{smallimage-int.csv}
+    \caption{int-Messwerte auf kleinem Bild in ms}
+    \label{tab:messwerteklein-int}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \csvautotabular{mediumimage-int.csv}
+    \caption{int-Messwerte auf mittlerem Bild in ms}
+    \label{tab:messwertemediumint-}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \csvautotabular{largeimage-int.csv}
+    \caption{int-Messwerte auf gro\ss{}em Bild in ms}
+    \label{tab:messwertelarge-int}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \csvautotabular{memtime.csv}
+    \caption{Memory Timings in Abh\"angigkeit von der Bildgr\"o\ss{}e}
+    \label{tab:memtimings}
+\end{table}
+
 
 \end{document}

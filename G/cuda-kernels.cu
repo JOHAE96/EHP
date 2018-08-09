@@ -74,7 +74,7 @@ __global__ void mirrorKernel(unsigned char* img_in, unsigned char* img_out, int 
             adrIn=adrOut;
         
         } else {
-            adrIn=(width-i+j*width)*4; %\label{line:mirror}%
+            adrIn=(width-i+j*width)*4; //%\label{line:mirror}%
         }
         r = img_in[adrIn+0];
         g = img_in[adrIn+1];
@@ -98,7 +98,7 @@ __global__ void bwKernel(unsigned char* img_in, unsigned char* img_out, int widt
         int adrIn=(i+j*width)*4;
         int adrOut=adrIn;
         unsigned char r,g,b,a;
-        unsigned char bw;
+        unsigned short bw;
 
         r = img_in[adrIn+0];
         g = img_in[adrIn+1];
@@ -107,9 +107,9 @@ __global__ void bwKernel(unsigned char* img_in, unsigned char* img_out, int widt
     
         bw = (r+g+b)/3;
 
-        img_out[adrOut+0] = bw; 
-        img_out[adrOut+1] = bw;
-        img_out[adrOut+2] = bw;
+        img_out[adrOut+0] = (unsigned char)bw; 
+        img_out[adrOut+1] = (unsigned char)bw;
+        img_out[adrOut+2] = (unsigned char)bw;
         img_out[adrOut+3] = a;
     }
 }
